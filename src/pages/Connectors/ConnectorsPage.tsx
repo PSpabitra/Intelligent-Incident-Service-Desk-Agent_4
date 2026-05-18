@@ -258,7 +258,7 @@ export default function ConnectorsPage() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">
-                  {activeTab === 'jira' ? 'Endpoint URL' : 'Instance ID'}
+                  {activeTab === 'jira' ? 'jira URL' : 'Instance ID'}
                 </label>
                 <input type={activeTab === 'jira' ? 'url' : 'text'}
                   className="w-full px-5 py-4 rounded-2xl text-sm font-bold outline-none border border-slate-200 focus:border-blue-500/50 transition-all"
