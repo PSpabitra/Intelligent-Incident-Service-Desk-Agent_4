@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Book, Upload, Search, Filter, FileText, Database, Layers, Clock, Eye, Trash2, ExternalLink } from 'lucide-react'
+import api from '../../services/api'
 
 export default function RunbooksPage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -18,21 +19,13 @@ export default function RunbooksPage() {
     formData.append('file', selectedFile);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}documents/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        alert('File uploaded successfully!');
-        setIsModalOpen(false);
-        setSelectedFile(null);
-      } else {
-        alert('Upload failed!');
-      }
+      await api.post('/api/documents/upload', formData);
+      alert('File uploaded successfully!');
+      setIsModalOpen(false);
+      setSelectedFile(null);
     } catch (error) {
       console.error('Error uploading file:', error);
-      alert('Error uploading file!');
+      alert('Upload failed!');
     } finally {
       setUploading(false);
     }
