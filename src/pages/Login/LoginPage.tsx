@@ -65,7 +65,7 @@ export default function LoginPage() {
             <ShieldAlert size={48} className="text-slate-900" />
           </div>
           <h1 className="text-5xl font-extrabold tracking-tighter mb-3" 
-            style={{ color: '#f8fafc', letterSpacing: '-0.02em' }}>
+            style={{ color: '#3b82f6', letterSpacing: '-0.02em' }}>
             SLA <span style={{ color: '#3b82f6' }}>Risk Engine</span>
           </h1>
           <p className="text-slate-600 font-medium text-lg">

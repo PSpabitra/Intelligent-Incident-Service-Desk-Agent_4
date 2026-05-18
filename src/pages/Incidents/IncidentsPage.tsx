@@ -223,94 +223,32 @@ export default function IncidentsPage() {
                 </button>
               </div>
 
-              {/* Title & Description */}
-              <div className="space-y-4 mb-8">
-                <h3 className="text-2xl font-bold text-slate-900 leading-tight">{selected.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{selected.description}</p>
+              {/* Summary */}
+              <div className="space-y-2 mb-6">
+                <p className="text-[10px] font-black text-slate-500 uppercase">Summary</p>
+                <h3 className="text-xl font-bold text-slate-900 leading-tight">{(selected as any).summary || selected.title}</h3>
               </div>
 
-              {/* Grid (8 items) */}
+              {/* Solution */}
+              <div className="space-y-2 mb-6">
+                <p className="text-[10px] font-black text-slate-500 uppercase">Solution</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{(selected as any).solution || selected.description}</p>
+              </div>
+
+              {/* Grid for Risk Score and Resolution Time */}
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Assignee</p>
-                  <p className="text-sm font-bold text-slate-900">{selected.assignee}</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Reporter</p>
-                  <p className="text-sm font-bold text-slate-900">{selected.reporter || 'N/A'}</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Status</p>
-                  <span className="text-[10px] font-black uppercase px-2 py-1 rounded-lg bg-slate-200/50 text-slate-600 inline-block w-fit mt-1">
-                    {selected.status}
-                  </span>
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Priority</p>
-                  <span className="text-[10px] font-black uppercase px-2 py-1 rounded-lg inline-block w-fit mt-1"
-                    style={{
-                      background: `${PRIORITY_COLOR[selected.priority] || '#94a3b8'}15`,
-                      color: PRIORITY_COLOR[selected.priority] || '#94a3b8',
-                      border: `1px solid ${PRIORITY_COLOR[selected.priority] || '#94a3b8'}30`
-                    }}>
-                    {selected.priority}
-                  </span>
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                   <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Risk Score</p>
-                  <p className="text-lg font-black" style={{
-                    color: selected.risk_score && selected.risk_score >= 70 ? '#ef4444' : selected.risk_score && selected.risk_score >= 40 ? '#f59e0b' : '#22c55e'
+                  <p className="text-lg font-black" style={{ 
+                    color: selected.risk_score && selected.risk_score >= 70 ? '#ef4444' : selected.risk_score && selected.risk_score >= 40 ? '#f59e0b' : '#22c55e' 
                   }}>
-                    {selected.risk_score?.toFixed(0)}%
+                    {selected.risk_score ? `${Number(selected.risk_score).toFixed(0)}%` : 'N/A'}
                   </p>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Breach Prob.</p>
-                  <p className="text-lg font-black text-red-400">{selected.breach_probability ? `${Number(selected.breach_probability).toFixed(1)}%` : 'N/A'}</p>
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Est. Resolution Time</p>
+                  <p className="text-sm font-bold text-slate-900">{(selected as any).estimated_resolution_time || 'N/A'}</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Created At</p>
-                  <p className="text-xs font-bold text-slate-700">{selected.created_at ? new Date(selected.created_at).toLocaleString() : 'N/A'}</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">SLA Deadline</p>
-                  <p className="text-xs font-bold text-red-400">{selected.sla_due_at ? new Date(selected.sla_due_at).toLocaleString() : 'N/A'}</p>
-                </div>
-              </div>
-
-              {/* Reasons & Actions */}
-              <div className="space-y-8 mb-8">
-                {reasons.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-1.5 h-4 rounded-full bg-red-500" />
-                      <p className="text-xs font-black uppercase tracking-widest text-red-500">Risk Vectors</p>
-                    </div>
-                    <ul className="space-y-3">
-                      {reasons.map((r, i) => (
-                        <li key={i} className="p-4 rounded-2xl text-xs font-bold bg-red-500/5 border border-red-500/10 text-slate-700">
-                          {r}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {actions.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-1.5 h-4 rounded-full bg-green-500" />
-                      <p className="text-xs font-black uppercase tracking-widest text-green-500">Resolution Plan</p>
-                    </div>
-                    <ul className="space-y-3">
-                      {actions.map((a, i) => (
-                        <li key={i} className="p-4 rounded-2xl text-xs font-bold bg-green-500/5 border border-green-500/10 text-slate-700">
-                          {a}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
 
               {/* Action Button */}

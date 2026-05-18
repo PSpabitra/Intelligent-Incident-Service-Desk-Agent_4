@@ -9,6 +9,7 @@ const LoginPage     = lazy(() => import('../pages/Login/LoginPage'))
 const DashboardPage = lazy(() => import('../pages/Dashboard/DashboardPage'))
 const IncidentsPage = lazy(() => import('../pages/Incidents/IncidentsPage'))
 const ConnectorsPage = lazy(() => import('../pages/Connectors/ConnectorsPage'))
+const RunbooksPage = lazy(() => import('../pages/Runbooks/RunbooksPage'))
 
 function PageLoader() {
   return (
@@ -30,6 +31,7 @@ export default function AppRouter() {
               <Route path="/dashboard"  element={<DashboardPage />} />
               <Route path="/incidents"  element={<IncidentsPage />} />
               <Route path="/connectors" element={<ConnectorsPage />} />
+              <Route path="/runbooks"   element={<RunbooksPage />} />
               <Route path="/"           element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Route>
