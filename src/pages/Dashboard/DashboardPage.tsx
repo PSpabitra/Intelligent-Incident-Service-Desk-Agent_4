@@ -118,7 +118,7 @@ export default function DashboardPage() {
   return (
     <div className="p-8 max-w-[1600px] mx-auto min-h-screen" style={{ background: '#f8fafc', fontFamily: "'DM Sans', sans-serif" }}>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 sticky top-0 bg-[#f8fafc] z-10 -mx-8 px-8 py-4">
         <div>
           <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
             Risk Intelligence <span style={{ color: '#3b82f6' }}>Command Center</span>

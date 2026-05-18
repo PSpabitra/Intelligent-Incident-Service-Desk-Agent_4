@@ -19,12 +19,12 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-64 min-h-screen flex flex-col" style={{
+    <aside className="w-64 h-full flex flex-col" style={{
       background: 'var(--bg-secondary)',
       borderRight: '1px solid var(--border)',
     }}>
       {/* Logo */}
-      <div className="p-6 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border)' }}>
+      <div className="h-14 px-6 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="w-9 h-9 rounded-lg flex items-center justify-center"
           style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
           <ShieldAlert size={20} className="text-slate-900" />
@@ -62,16 +62,6 @@ export default function Sidebar() {
 
       {/* User info */}
       <div className="p-4" style={{ borderTop: '1px solid var(--border)' }}>
-        <div className="flex items-center gap-3 mb-3 px-2">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-slate-900"
-            style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
-            {user?.name?.charAt(0).toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{user?.name}</div>
-            <div className="text-xs capitalize" style={{ color: 'var(--text-secondary)' }}>{user?.role}</div>
-          </div>
-        </div>
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-red-500/10"
