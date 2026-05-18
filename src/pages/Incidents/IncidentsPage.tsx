@@ -18,6 +18,9 @@ export default function IncidentsPage() {
   const [sourceFilter, setSourceFilter] = useState('')
   const [selected, setSelected] = useState<Incident | null>(null)
 
+  const reasons: string[] = selected ? (typeof selected.reasons === 'string' ? JSON.parse(selected.reasons) : (selected.reasons || [])) : [];
+  const actions: string[] = selected ? (typeof selected.recommended_actions === 'string' ? JSON.parse(selected.recommended_actions) : (selected.recommended_actions || [])) : [];
+
   const load = async () => {
     setLoading(true)
     try {
@@ -110,7 +113,7 @@ export default function IncidentsPage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Main Table View */}
         <div className="xl:col-span-3 transition-all duration-500">
-          <div className="rounded-[40px] border shadow-2xl overflow-hidden"
+          <div className="rounded-[40px] border overflow-hidden"
             style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(40px)', borderColor: 'rgba(0, 0, 0, 0.05)' }}>
 
             {loading ? (
@@ -255,14 +258,14 @@ export default function IncidentsPage() {
 
               {/* Reasons & Actions */}
               <div className="space-y-8 mb-8">
-                {selected.reasons && selected.reasons.length > 0 && (
+                {reasons.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-4">
                       <div className="w-1.5 h-4 rounded-full bg-red-500" />
                       <p className="text-xs font-black uppercase tracking-widest text-red-500">Risk Vectors</p>
                     </div>
                     <ul className="space-y-3">
-                      {selected.reasons.map((r, i) => (
+                      {reasons.map((r, i) => (
                         <li key={i} className="p-4 rounded-2xl text-xs font-bold bg-red-500/5 border border-red-500/10 text-slate-700">
                           {r}
                         </li>
@@ -271,14 +274,14 @@ export default function IncidentsPage() {
                   </div>
                 )}
 
-                {selected.recommended_actions && selected.recommended_actions.length > 0 && (
+                {actions.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-4">
                       <div className="w-1.5 h-4 rounded-full bg-green-500" />
                       <p className="text-xs font-black uppercase tracking-widest text-green-500">Resolution Plan</p>
                     </div>
                     <ul className="space-y-3">
-                      {selected.recommended_actions.map((a, i) => (
+                      {actions.map((a, i) => (
                         <li key={i} className="p-4 rounded-2xl text-xs font-bold bg-green-500/5 border border-green-500/10 text-slate-700">
                           {a}
                         </li>
