@@ -16,6 +16,7 @@ export default function IncidentsPage() {
   const [loading, setLoading] = useState(false)
   const [riskFilter, setRiskFilter] = useState('')
   const [sourceFilter, setSourceFilter] = useState('')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [selected, setSelected] = useState<Incident | null>(null)
 
   const reasons: string[] = selected ? (typeof selected.reasons === 'string' ? JSON.parse(selected.reasons) : (selected.reasons || [])) : [];
@@ -26,9 +27,8 @@ export default function IncidentsPage() {
     try {
       const res = await api.get('/api/incidents/', {
         params: {
-          page, per_page: perPage,
-          risk_level: riskFilter,
-          source: sourceFilter,
+          page: 1,
+          per_page: 10,
         }
       })
       setIncidents(res.data.incidents)
@@ -41,9 +41,20 @@ export default function IncidentsPage() {
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [page, riskFilter, sourceFilter])
+  useEffect(() => { load() }, [])
 
-  const totalPages = Math.ceil(total / perPage)
+  const filteredIncidents = incidents.filter(inc => {
+    const matchesRisk = !riskFilter || inc.risk_level === riskFilter;
+    const matchesSource = !sourceFilter || inc.source === sourceFilter;
+    return matchesRisk && matchesSource;
+  }).sort((a, b) => {
+    const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+  });
+
+  const totalPages = Math.ceil(filteredIncidents.length / perPage);
+  const paginatedIncidents = filteredIncidents.slice((page - 1) * perPage, page * perPage);
 
   return (
     <div className="p-8 max-w-[1600px] mx-auto min-h-screen" style={{ background: '#f8fafc', fontFamily: "'DM Sans', sans-serif" }}>
@@ -58,7 +69,7 @@ export default function IncidentsPage() {
               <AlertTriangle size={14} style={{ color: '#ef4444' }} />
               Active Monitoring
             </div>
-            <span className="text-xs">{total} total records detected</span>
+            <span className="text-xs">{filteredIncidents.length} total records detected</span>
           </div>
         </div>
 
@@ -126,19 +137,30 @@ export default function IncidentsPage() {
                 <table className="w-full text-left">
                   <thead>
                     <tr style={{ background: 'rgba(241, 245, 249, 0.5)' }}>
-                      {['Title', 'Status', 'Source', 'Risk Level', 'Risk Score', 'Priority', 'Created At'].map(h => (
+                      {['Title', 'Status', 'Source', 'Risk Level', 'Risk Score', 'Priority'].map(h => (
                         <th key={h} className="px-4 py-4 text-[10px] font-black uppercase tracking-widest" style={{ color: '#64748b' }}>{h}</th>
                       ))}
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-slate-100/50 transition-colors" 
+                        style={{ color: '#64748b' }}
+                        onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Created At
+                          <span className="text-xs">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
+                        </div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
-                    {incidents.length === 0 ? (
+                    {paginatedIncidents.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-4 py-24 text-center text-slate-500 font-medium">
                           No active incidents match current segment filters.
                         </td>
                       </tr>
-                    ) : incidents.map((inc) => (
+                    ) : paginatedIncidents.map((inc) => (
                       <tr
                         key={inc.id}
                         onClick={() => setSelected(selected?.id === inc.id ? null : inc)}
@@ -152,14 +174,14 @@ export default function IncidentsPage() {
                         <td className="px-4 py-4">
                           <RiskBadge level={inc.risk_level} size="sm" />
                         </td>
-                        <td className="px-4 py-4 text-lg font-black" style={{ 
-                          color: inc.risk_score && inc.risk_score >= 70 ? '#ef4444' : inc.risk_score && inc.risk_score >= 40 ? '#f59e0b' : '#22c55e' 
+                        <td className="px-4 py-4 text-lg font-black" style={{
+                          color: inc.risk_score && inc.risk_score >= 70 ? '#ef4444' : inc.risk_score && inc.risk_score >= 40 ? '#f59e0b' : '#22c55e'
                         }}>
                           {inc.risk_score?.toFixed(0)}%
                         </td>
                         <td className="px-4 py-4">
                           <span className="text-xs font-black uppercase px-3 py-1.5 rounded-xl"
-                            style={{ 
+                            style={{
                               background: `${PRIORITY_COLOR[inc.priority] || '#94a3b8'}15`,
                               color: PRIORITY_COLOR[inc.priority] || '#94a3b8',
                               border: `1px solid ${PRIORITY_COLOR[inc.priority] || '#94a3b8'}30`
@@ -226,7 +248,7 @@ export default function IncidentsPage() {
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                   <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Priority</p>
                   <span className="text-[10px] font-black uppercase px-2 py-1 rounded-lg inline-block w-fit mt-1"
-                    style={{ 
+                    style={{
                       background: `${PRIORITY_COLOR[selected.priority] || '#94a3b8'}15`,
                       color: PRIORITY_COLOR[selected.priority] || '#94a3b8',
                       border: `1px solid ${PRIORITY_COLOR[selected.priority] || '#94a3b8'}30`
@@ -236,8 +258,8 @@ export default function IncidentsPage() {
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                   <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Risk Score</p>
-                  <p className="text-lg font-black" style={{ 
-                    color: selected.risk_score && selected.risk_score >= 70 ? '#ef4444' : selected.risk_score && selected.risk_score >= 40 ? '#f59e0b' : '#22c55e' 
+                  <p className="text-lg font-black" style={{
+                    color: selected.risk_score && selected.risk_score >= 70 ? '#ef4444' : selected.risk_score && selected.risk_score >= 40 ? '#f59e0b' : '#22c55e'
                   }}>
                     {selected.risk_score?.toFixed(0)}%
                   </p>
