@@ -30,7 +30,7 @@ export default function IncidentsPage() {
       })
       setIncidents(res.data.incidents)
       setTotal(res.data.total)
-    } catch (e) { 
+    } catch (e) {
       console.error('API fetch failed.', e)
       setIncidents([])
       setTotal(0)
@@ -62,7 +62,7 @@ export default function IncidentsPage() {
         <div className="flex items-center gap-3">
           <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-            <input type="text" placeholder="Search incidents..." 
+            <input type="text" placeholder="Search incidents..."
               className="pl-12 pr-6 py-3 rounded-2xl text-sm outline-none transition-all border border-slate-200 bg-slate-100/40 w-64 focus:w-80"
               style={{ color: 'var(--text-primary)' }} />
           </div>
@@ -109,10 +109,10 @@ export default function IncidentsPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Main Table View */}
-        <div className={`xl:col-span-2 transition-all duration-500 ${selected ? 'opacity-90 scale-[0.98]' : 'opacity-100 scale-100'}`}>
+        <div className="xl:col-span-3 transition-all duration-500">
           <div className="rounded-[40px] border shadow-2xl overflow-hidden"
             style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(40px)', borderColor: 'rgba(0, 0, 0, 0.05)' }}>
-            
+
             {loading ? (
               <div className="flex flex-col items-center justify-center h-[500px] gap-4">
                 <Loader2 size={48} className="animate-spin" style={{ color: '#3b82f6' }} />
@@ -123,15 +123,15 @@ export default function IncidentsPage() {
                 <table className="w-full text-left">
                   <thead>
                     <tr style={{ background: 'rgba(241, 245, 249, 0.5)' }}>
-                      {['Identity', 'Status', 'Risk Control', 'Priority'].map(h => (
-                        <th key={h} className="px-8 py-6 text-[10px] font-black uppercase tracking-widest" style={{ color: '#64748b' }}>{h}</th>
+                      {['Title', 'Status', 'Source', 'Risk Level', 'Risk Score', 'Priority', 'Created At'].map(h => (
+                        <th key={h} className="px-4 py-4 text-[10px] font-black uppercase tracking-widest" style={{ color: '#64748b' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
                     {incidents.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-8 py-24 text-center text-slate-500 font-medium">
+                        <td colSpan={7} className="px-4 py-24 text-center text-slate-500 font-medium">
                           No active incidents match current segment filters.
                         </td>
                       </tr>
@@ -143,29 +143,18 @@ export default function IncidentsPage() {
                         style={{
                           background: selected?.id === inc.id ? 'rgba(59,130,246,0.08)' : undefined
                         }}>
-                        <td className="px-8 py-7">
-                          <div className="flex flex-col gap-1">
-                            <span className="font-mono text-xs font-bold" style={{ color: '#60a5fa' }}>{inc.ticket_id}</span>
-                            <span className="text-sm font-bold text-slate-900 truncate max-w-[200px]">{inc.title}</span>
-                          </div>
+                        <td className="px-4 py-4 text-sm font-bold text-slate-900 truncate max-w-[200px]">{inc.title}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 capitalize">{inc.status}</td>
+                        <td className="px-4 py-4 text-[10px] font-bold uppercase text-slate-600">{inc.source}</td>
+                        <td className="px-4 py-4">
+                          <RiskBadge level={inc.risk_level} size="sm" />
                         </td>
-                        <td className="px-8 py-7">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-xs font-bold text-slate-600 capitalize">{inc.status}</span>
-                            <span className="text-[10px] font-bold uppercase text-slate-600">{inc.source}</span>
-                          </div>
+                        <td className="px-4 py-4 text-lg font-black" style={{ 
+                          color: inc.risk_score && inc.risk_score >= 70 ? '#ef4444' : inc.risk_score && inc.risk_score >= 40 ? '#f59e0b' : '#22c55e' 
+                        }}>
+                          {inc.risk_score?.toFixed(0)}%
                         </td>
-                        <td className="px-8 py-7">
-                          <div className="flex items-center gap-4">
-                            <RiskBadge level={inc.risk_level} size="sm" />
-                            <span className="text-lg font-black" style={{ 
-                              color: inc.risk_score && inc.risk_score >= 70 ? '#ef4444' : inc.risk_score && inc.risk_score >= 40 ? '#f59e0b' : '#22c55e' 
-                            }}>
-                              {inc.risk_score?.toFixed(0)}%
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-8 py-7">
+                        <td className="px-4 py-4">
                           <span className="text-xs font-black uppercase px-3 py-1.5 rounded-xl"
                             style={{ 
                               background: `${PRIORITY_COLOR[inc.priority] || '#94a3b8'}15`,
@@ -174,6 +163,9 @@ export default function IncidentsPage() {
                             }}>
                             {inc.priority}
                           </span>
+                        </td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-700">
+                          {inc.created_at ? new Date(inc.created_at).toLocaleString() : 'N/A'}
                         </td>
                       </tr>
                     ))}
@@ -184,42 +176,85 @@ export default function IncidentsPage() {
           </div>
         </div>
 
-        {/* Detail Panel */}
-        <div className={`transition-all duration-500 transform ${selected ? 'translate-x-0 opacity-100 pointer-events-auto' : 'translate-x-12 opacity-0 pointer-events-none absolute right-0'}`}>
+        {/* Backdrop */}
+        {selected && (
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" onClick={() => setSelected(null)} />
+        )}
+
+        {/* Detail Drawer */}
+        <div className={`fixed inset-y-0 right-0 w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-500 overflow-y-auto ${selected ? 'translate-x-0' : 'translate-x-full'}`}>
           {selected && (
-            <div className="rounded-[40px] border shadow-2xl overflow-hidden sticky top-8"
-              style={{ background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(50px)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
-              <div className="p-8 border-b" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                      <AlertTriangle size={20} />
-                    </span>
-                    <span className="font-mono text-lg font-black text-slate-900">{selected.ticket_id}</span>
-                  </div>
-                  <button onClick={() => setSelected(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
-                    <span className="text-slate-500 text-sm">✕</span>
-                  </button>
+            <div className="p-8">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                    <AlertTriangle size={20} />
+                  </span>
+                  <span className="font-mono text-lg font-black text-slate-900">{selected.ticket_id}</span>
                 </div>
+                <button onClick={() => setSelected(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+                  <span className="text-slate-500 text-sm">✕</span>
+                </button>
+              </div>
 
-                <div className="space-y-4 mb-8">
-                  <h3 className="text-2xl font-bold text-slate-900 leading-tight">{selected.title}</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{selected.description}</p>
+              {/* Title & Description */}
+              <div className="space-y-4 mb-8">
+                <h3 className="text-2xl font-bold text-slate-900 leading-tight">{selected.title}</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">{selected.description}</p>
+              </div>
+
+              {/* Grid (8 items) */}
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Assignee</p>
+                  <p className="text-sm font-bold text-slate-900">{selected.assignee}</p>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                    <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Assignee</p>
-                    <p className="text-sm font-bold text-slate-900">{selected.assignee}</p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                    <p className="text-[10px] font-black text-slate-500 uppercase mb-1">SLA Deadline</p>
-                    <p className="text-sm font-bold text-red-400">{selected.sla_due_at ? new Date(selected.sla_due_at).toLocaleTimeString() : 'N/A'}</p>
-                  </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Reporter</p>
+                  <p className="text-sm font-bold text-slate-900">{selected.reporter || 'N/A'}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Status</p>
+                  <span className="text-[10px] font-black uppercase px-2 py-1 rounded-lg bg-slate-200/50 text-slate-600 inline-block w-fit mt-1">
+                    {selected.status}
+                  </span>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Priority</p>
+                  <span className="text-[10px] font-black uppercase px-2 py-1 rounded-lg inline-block w-fit mt-1"
+                    style={{ 
+                      background: `${PRIORITY_COLOR[selected.priority] || '#94a3b8'}15`,
+                      color: PRIORITY_COLOR[selected.priority] || '#94a3b8',
+                      border: `1px solid ${PRIORITY_COLOR[selected.priority] || '#94a3b8'}30`
+                    }}>
+                    {selected.priority}
+                  </span>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Risk Score</p>
+                  <p className="text-lg font-black" style={{ 
+                    color: selected.risk_score && selected.risk_score >= 70 ? '#ef4444' : selected.risk_score && selected.risk_score >= 40 ? '#f59e0b' : '#22c55e' 
+                  }}>
+                    {selected.risk_score?.toFixed(0)}%
+                  </p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Breach Prob.</p>
+                  <p className="text-lg font-black text-red-400">{selected.breach_probability ? `${Number(selected.breach_probability).toFixed(1)}%` : 'N/A'}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Created At</p>
+                  <p className="text-xs font-bold text-slate-700">{selected.created_at ? new Date(selected.created_at).toLocaleString() : 'N/A'}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">SLA Deadline</p>
+                  <p className="text-xs font-bold text-red-400">{selected.sla_due_at ? new Date(selected.sla_due_at).toLocaleString() : 'N/A'}</p>
                 </div>
               </div>
 
-              <div className="p-8 space-y-8">
+              {/* Reasons & Actions */}
+              <div className="space-y-8 mb-8">
                 {selected.reasons && selected.reasons.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-4">
@@ -253,8 +288,9 @@ export default function IncidentsPage() {
                 )}
               </div>
 
-              <div className="p-8 pt-0">
-                <button className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-slate-900 font-bold transition-all shadow-xl shadow-blue-900/20">
+              {/* Action Button */}
+              <div>
+                <button className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-xl shadow-blue-900/20">
                   Execute Mitigation Suite
                 </button>
               </div>
