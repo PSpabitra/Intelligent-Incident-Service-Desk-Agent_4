@@ -60,12 +60,12 @@ export default function IncidentsPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="relative group">
+          {/* <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <input type="text" placeholder="Search incidents..."
               className="pl-12 pr-6 py-3 rounded-2xl text-sm outline-none transition-all border border-slate-200 bg-slate-100/40 w-64 focus:w-80"
               style={{ color: 'var(--text-primary)' }} />
-          </div>
+          </div> */}
         </div>
       </div>
 
