@@ -44,11 +44,11 @@ export default function RunbooksPage() {
           <div className="flex items-center gap-3 mb-2">
             <Book size={32} className="text-slate-900" />
             <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-              Runbooks
+              Knowledge Base
             </h1>
           </div>
           <p className="text-sm text-slate-500 font-medium">
-            Upload PDF/DOCX runbooks · stored locally · indexed into the RAG vector store
+            Upload PDF/DOCX articles · stored locally · indexed into the RAG vector store
           </p>
         </div>
 
