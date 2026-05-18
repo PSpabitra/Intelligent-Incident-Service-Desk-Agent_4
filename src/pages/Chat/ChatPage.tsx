@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { MessageSquare, Send, Bot, User, Sparkles, Paperclip, Mic, Search, ChevronDown, Loader2 } from 'lucide-react'
 import api from '../../services/api'
 
@@ -16,6 +16,22 @@ export default function ChatPage() {
   const [selectedIncident, setSelectedIncident] = useState<any>(null)
   const [incidents, setIncidents] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to the bottom of messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // Auto-resize the input textarea height as user types
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+    }
+  }, [input])
 
   useEffect(() => {
     const loadIncidents = async () => {
@@ -41,6 +57,10 @@ export default function ChatPage() {
       { role: 'user', content: input, time: 'Just now' }
     ])
     setInput('')
+    
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+    }
 
     // Mock response
     setTimeout(() => {
@@ -201,11 +221,11 @@ export default function ChatPage() {
                 </div>
               )}
 
-              <div className={`max-w-[70%] p-5 rounded-3xl text-sm ${msg.role === 'user'
+              <div className={`max-w-[70%] break-words min-w-0 p-5 rounded-3xl text-sm ${msg.role === 'user'
                   ? 'bg-blue-600 text-white rounded-tr-none'
                   : 'bg-white border border-slate-100 text-slate-700 rounded-tl-none shadow-sm'
                 }`}>
-                <div className="whitespace-pre-wrap leading-relaxed">
+                <div className="whitespace-pre-wrap leading-relaxed break-words overflow-hidden">
                   {msg.content}
                 </div>
                 <div className={`text-[10px] mt-2 font-medium ${msg.role === 'user' ? 'text-blue-100' : 'text-slate-400'}`}>
@@ -220,29 +240,37 @@ export default function ChatPage() {
               )}
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
         <div className="p-6 bg-white border-t border-slate-100">
-          <div className={`relative flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-2 pl-4 shadow-sm focus-within:border-blue-500/50 transition-all ${!selectedIncident ? 'opacity-50 cursor-not-allowed' : ''
+          <div className={`relative flex items-end gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-2 pl-4 shadow-sm focus-within:border-blue-500/50 transition-all ${!selectedIncident ? 'opacity-50 cursor-not-allowed' : ''
             }`}>
-            <input
-              type="text"
+            <textarea
+              ref={textareaRef}
+              rows={1}
               placeholder={selectedIncident ? "Ask anything about this incident..." : "Please select an incident first"}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-              className="flex-1 text-sm font-medium outline-none text-slate-700 bg-transparent"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSend()
+                }
+              }}
+              className="flex-1 text-sm font-medium outline-none text-slate-700 bg-transparent resize-none py-1.5 max-h-32 overflow-y-auto leading-relaxed"
               disabled={!selectedIncident}
+              style={{ minHeight: '24px' }}
             />
 
             <div className="flex items-center gap-1">
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600" disabled={!selectedIncident}>
+              {/* <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600" disabled={!selectedIncident}>
                 <Paperclip size={18} />
               </button>
               <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600" disabled={!selectedIncident}>
                 <Mic size={18} />
-              </button>
+              </button> */}
               <button
                 onClick={handleSend}
                 disabled={!selectedIncident}
