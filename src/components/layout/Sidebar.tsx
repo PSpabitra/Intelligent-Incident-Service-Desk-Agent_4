@@ -61,7 +61,7 @@ export default function Sidebar() {
       </nav>
 
       {/* User info */}
-      <div className="p-4" style={{ borderTop: '1px solid var(--border)' }}>
+      <div className="p-2.5" style={{ borderTop: '1px solid var(--border)' }}>
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-red-500/10"
