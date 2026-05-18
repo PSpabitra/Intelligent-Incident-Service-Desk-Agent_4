@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
-import api, { isDemoMode } from '../../services/api'
+import api from '../../services/api'
 import { Plug, CheckCircle2, XCircle, Loader2, RefreshCw, Trash2, Activity, Zap, Clock, Shield, Database } from 'lucide-react'
 import type { Connector } from '../../types'
 
@@ -42,10 +42,7 @@ const CONNECTOR_META = {
   },
 }
 
-const DEMO_CONNECTORS: Connector[] = [
-  { id: 1, connector_type: 'jira', base_url: 'https://demo-corp.atlassian.net', username: 'admin@demo.com', is_active: true, last_synced_at: new Date().toISOString(), created_at: new Date(Date.now() - 86400000 * 7).toISOString() },
-  { id: 2, connector_type: 'servicenow', base_url: 'https://demo-corp.service-now.com', username: 'svc-admin', is_active: true, last_synced_at: new Date(Date.now() - 300000).toISOString(), created_at: new Date(Date.now() - 86400000 * 3).toISOString() },
-]
+
 
 export default function ConnectorsPage() {
   const [connectors, setConnectors] = useState<Connector[]>([])
@@ -69,17 +66,7 @@ export default function ConnectorsPage() {
     setLoading(true)
     setError('')
 
-    if (isDemoMode()) {
-      setIsFallback(true)
-      setConnectors(DEMO_CONNECTORS.map(c => ({
-        ...c,
-        last_synced_at: new Date(Date.now() - Math.random() * 600000).toISOString()
-      })))
-      setSchedulerStatus({ running: true, sync_interval_seconds: 60, scheduler_interval_seconds: 120, jobs: [{ id: 'sync_tickets', next_run: new Date(Date.now() + 45000).toISOString() }] })
-      setLastRefresh(new Date())
-      setLoading(false)
-      return
-    }
+
 
     try {
       const [connRes, schedRes] = await Promise.allSettled([
@@ -105,9 +92,8 @@ export default function ConnectorsPage() {
       if (e?.response?.status === 401) {
         setError('Session expired. Please log in again.')
       } else {
-        setIsFallback(true)
-        setConnectors(DEMO_CONNECTORS)
-        setSchedulerStatus({ running: true, sync_interval_seconds: 60, scheduler_interval_seconds: 120, jobs: [] })
+        setConnectors([])
+        setSchedulerStatus(null)
       }
     } finally {
       setLoading(false)
@@ -128,24 +114,7 @@ export default function ConnectorsPage() {
     setError('')
     setSuccess('')
 
-    if (isDemoMode()) {
-      await new Promise(r => setTimeout(r, 1500))
-      const newConn: Connector = {
-        id: Date.now(),
-        connector_type: activeTab,
-        base_url: data.base_url,
-        username: data.username,
-        app_id: data.app_id || null,
-        is_active: true,
-        last_synced_at: null,
-        created_at: new Date().toISOString(),
-      }
-      setConnectors(prev => [...prev, newConn])
-      setSuccess(`${CONNECTOR_META[activeTab].label} connected! Auto-sync will begin shortly.`)
-      reset()
-      setConnecting(false)
-      return
-    }
+
 
     try {
       await api.post('/api/connectors/connect', { ...data, connector_type: activeTab })
@@ -170,10 +139,7 @@ export default function ConnectorsPage() {
 
   // ── Disconnect ──
   const handleDisconnect = async (id: number) => {
-    if (isDemoMode()) {
-      setConnectors(prev => prev.filter(c => c.id !== id))
-      return
-    }
+
     try {
       await api.delete(`/api/connectors/${id}`)
       loadConnectors()
@@ -186,12 +152,7 @@ export default function ConnectorsPage() {
   // ── Trigger manual sync ──
   const triggerSync = async () => {
     setSyncing(true)
-    if (isDemoMode()) {
-      await new Promise(r => setTimeout(r, 2000))
-      setConnectors(prev => prev.map(c => ({ ...c, last_synced_at: new Date().toISOString() })))
-      setSyncing(false)
-      return
-    }
+
     try {
       await api.post('/api/scheduler/sync')
       setTimeout(() => { loadConnectors(); setSyncing(false) }, 3000)

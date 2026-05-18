@@ -23,7 +23,7 @@ import {
   Pie, 
   Cell,
 } from 'recharts'
-import api, { isDemoMode } from '../../services/api'
+import api from '../../services/api'
 import type { DashboardStats, Incident } from '../../types'
 import RiskBadge from '../../components/ui/RiskBadge'
 
@@ -49,7 +49,7 @@ export default function DashboardPage() {
     setError(null)
     setIsFallback(false)
 
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('sla_token');
 
     // Proactively check for the token before making the API call.
     if (!token) {
@@ -62,46 +62,7 @@ export default function DashboardPage() {
       return; // Stop execution if no token is found
     }
 
-    // If it's a demo token, use fallback data and skip the API call
-    if (isDemoMode()) {
-      console.log('Demo mode detected. Using fallback data.');
-      setIsFallback(true);
-      
-      // Premium Dynamic Demo Fallback Data (Randomized for "Dynamic" feel)
-      const randomShift = () => Math.floor(Math.random() * 10) - 5;
-      const totalIncidents = 142 + randomShift();
-      
-      setStats({
-        total_incidents: totalIncidents,
-        high_risk: 12 + (randomShift() > 0 ? 1 : -1),
-        medium_risk: 45 + randomShift(),
-        low_risk: 85 + randomShift(),
-        avg_risk_score: 65 + Math.random() * 10
-      });
-      
-      setBySource([
-        { source: 'jira', count: 84 + randomShift() },
-        { source: 'servicenow', count: 42 + randomShift() },
-        { source: 'salesforce', count: 16 + randomShift() }
-      ]);
-      
-      setByPriority([
-        { priority: 'critical', count: 8 + (randomShift() > 0 ? 1 : 0) },
-        { priority: 'high', count: 24 + randomShift() },
-        { priority: 'medium', count: 65 + randomShift() },
-        { priority: 'low', count: 45 + randomShift() }
-      ]);
-      
-      setTopRisk([
-        { ticket_id: 'SUP-101', title: 'Database connection timeout', source: 'jira', priority: 'critical', risk_score: 94.5 + Math.random(), risk_level: 'HIGH' },
-        { ticket_id: 'INC-202', title: 'Memory leak in cache layer', source: 'servicenow', priority: 'high', risk_score: 72.1 + Math.random(), risk_level: 'HIGH' },
-        { ticket_id: 'SUP-103', title: 'Slow API responses in EU region', source: 'jira', priority: 'medium', risk_score: 41.5 + Math.random(), risk_level: 'MEDIUM' }
-      ]);
-      
-      setLastRefresh(new Date());
-      setLoading(false);
-      return;
-    }
+
 
     try {
       const res = await api.get('/api/incidents/dashboard')
@@ -127,8 +88,7 @@ export default function DashboardPage() {
         setError('Your session has expired. Redirecting to login...')
         // Use a timeout to allow the user to see the message before redirecting
         setTimeout(() => {
-          // Clear the invalid token and redirect to login
-          localStorage.removeItem('authToken')
+          localStorage.removeItem('sla_token')
           navigate('/login')
         }, 2000)
       } else {

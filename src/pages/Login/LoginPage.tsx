@@ -17,45 +17,19 @@ export default function LoginPage() {
   const onSubmit = async (data: FormData) => {
     setError('')
     try {
+      console.log('Attempting login...', data)
       const res = await api.post('/api/auth/login', data)
-      localStorage.setItem('authToken', res.data.token)
+      console.log('Login successful! Response:', res.data)
+      
+      if (!res.data || !res.data.token) {
+        console.error('Token is missing from response payload!')
+      }
+
       setAuth(res.data.user, res.data.token)
+      console.log('Stored token via setAuth, navigating to /dashboard')
       navigate('/dashboard')
     } catch (e: any) {
-      console.warn('API Authentication failed, attempting demo fallback...', e)
-
-      // --- Demo Fallback Logic ---
-      const demoUsers: Record<string, any> = {
-        'alice@company.com': { id: 1, name: 'Alice Admin', email: 'alice@company.com', role: 'admin', pass: 'Admin@123' },
-        'bob@company.com': { id: 2, name: 'Bob Engineer', email: 'bob@company.com', role: 'engineer', pass: 'Engineer@123' }
-      }
-      const demoUser = demoUsers[data.email]
-
-      // Case 1: Specific demo user credentials match
-      if (demoUser && demoUser.pass === data.password) {
-        const demoToken = 'demo-token-' + Date.now()
-        localStorage.setItem('authToken', demoToken)
-        setAuth(demoUser, demoToken)
-        navigate('/dashboard')
-        return
-      }
-
-      // Case 2: API is down or has a server error (permissive fallback)
-      if (!e.response || e.response.status >= 500) {
-        const permissiveDemoUser = {
-          id: 999,
-          name: `${data.email.split('@')[0].toUpperCase()} (Demo)`,
-          email: data.email,
-          role: 'admin' as const
-        }
-        const demoToken = 'demo-token-' + Date.now()
-        localStorage.setItem('authToken', demoToken)
-        setAuth(permissiveDemoUser, demoToken)
-        navigate('/dashboard')
-        return
-      }
-
-      // Case 3: Real auth failed and no fallback applied
+      console.error('Login Error:', e)
       setError(e.response?.data?.message || e.response?.data?.error || 'Invalid credentials or server error.')
     }
   }

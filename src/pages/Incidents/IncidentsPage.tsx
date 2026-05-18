@@ -31,66 +31,9 @@ export default function IncidentsPage() {
       setIncidents(res.data.incidents)
       setTotal(res.data.total)
     } catch (e) { 
-      console.warn('API fetch failed, using demo fallback for incidents...', e)
-      
-      const randomShift = () => Math.floor(Math.random() * 10) - 5
-      const now = new Date()
-      
-      const demoIncidents: Incident[] = [
-        {
-          id: 1, source: 'jira', ticket_id: 'SUP-101', 
-          title: 'Database connection timeout', 
-          description: 'Customers cannot log in via the main portal.',
-          priority: 'critical', status: 'In Progress', 
-          assignee: 'Bob Engineer', reporter: 'Alice Admin',
-          created_at: new Date(now.getTime() - 3600000).toISOString(), 
-          updated_at: now.toISOString(),
-          resolved_at: null, sla_due_at: new Date(now.getTime() + 7200000).toISOString(),
-          reassignment_count: 1, ingested_at: now.toISOString(),
-          risk_score: 94.5 + Math.random(), risk_level: 'HIGH', breach_probability: '98%',
-          reasons: ['Main portal login failure detected', 'Database latency exceeding 5000ms'],
-          recommended_actions: ['Reboot main DB cluster', 'Scale auth-service pods'],
-          calculated_at: now.toISOString()
-        },
-        {
-          id: 2, source: 'servicenow', ticket_id: 'INC-202',
-          title: 'Memory leak in cache layer',
-          description: 'Nodes are failing health checks every 15 minutes.',
-          priority: 'high', status: 'Analysis',
-          assignee: 'Alice Admin', reporter: 'System Monitor',
-          created_at: new Date(now.getTime() - 7200000).toISOString(),
-          updated_at: now.toISOString(),
-          resolved_at: null, sla_due_at: new Date(now.getTime() + 14400000).toISOString(),
-          reassignment_count: 0, ingested_at: now.toISOString(),
-          risk_score: 72.1 + Math.random(), risk_level: 'HIGH', breach_probability: '65%',
-          reasons: ['Heap usage trend exponential', 'Auto-recovery cycles failing'],
-          recommended_actions: ['Flush Redis cache', 'Apply hotfix patch #22'],
-          calculated_at: now.toISOString()
-        },
-        {
-          id: 3, source: 'jira', ticket_id: 'SUP-103',
-          title: 'Slow API responses in EU region',
-          description: 'Latencies are spiked in eu-central-1.',
-          priority: 'medium', status: 'Watching',
-          assignee: 'Bob Engineer', reporter: 'Regional Lead',
-          created_at: new Date(now.getTime() - 10800000).toISOString(),
-          updated_at: now.toISOString(),
-          resolved_at: null, sla_due_at: new Date(now.getTime() + 21600000).toISOString(),
-          reassignment_count: 0, ingested_at: now.toISOString(),
-          risk_score: 41.5 + Math.random(), risk_level: 'MEDIUM', breach_probability: '20%',
-          reasons: ['Cross-region traffic spike', 'Degraded network path'],
-          recommended_actions: ['Traffic shift to eu-west-1', 'Investigate AWS outage logs'],
-          calculated_at: now.toISOString()
-        }
-      ]
-      
-      // Filter the demo data manually for the fallback
-      let filtered = [...demoIncidents]
-      if (riskFilter) filtered = filtered.filter(i => i.risk_level === riskFilter)
-      if (sourceFilter) filtered = filtered.filter(i => i.source === sourceFilter)
-      
-      setIncidents(filtered)
-      setTotal(demoIncidents.length)
+      console.error('API fetch failed.', e)
+      setIncidents([])
+      setTotal(0)
     }
     setLoading(false)
   }

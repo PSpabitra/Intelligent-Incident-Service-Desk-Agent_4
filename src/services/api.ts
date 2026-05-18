@@ -10,7 +10,6 @@ import axios from 'axios'
  */
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true,
 })
 
 api.interceptors.request.use((config) => {
@@ -19,20 +18,13 @@ api.interceptors.request.use((config) => {
     config.url = config.url.replace(/^\/api\//, '/');
   }
 
-  const token = localStorage.getItem('authToken')
+  const token = localStorage.getItem('sla_token')
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
 
-/**
- * Returns true when the current session is using a demo (non-JWT)
- * token, meaning API calls will fail with 401 on the backend.
- */
-export function isDemoMode(): boolean {
-  const token = localStorage.getItem('authToken')
-  return !token || token.startsWith('demo-token-')
-}
-
 export default api
+
+
