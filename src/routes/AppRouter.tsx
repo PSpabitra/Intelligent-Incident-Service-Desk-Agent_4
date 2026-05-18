@@ -4,6 +4,7 @@ import AppLayout from '../components/layout/AppLayout'
 import PrivateRoute from './PrivateRoute'
 import { Loader2 } from 'lucide-react'
 
+const LandingPage    = lazy(() => import('../pages/Landing/LandingPage'))
 const LoginPage     = lazy(() => import('../pages/Login/LoginPage'))
 const DashboardPage = lazy(() => import('../pages/Dashboard/DashboardPage'))
 const IncidentsPage = lazy(() => import('../pages/Incidents/IncidentsPage'))
@@ -22,6 +23,7 @@ export default function AppRouter() {
     <BrowserRouter>
       <Suspense fallback={<PageLoader />}>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route element={<PrivateRoute />}>
             <Route element={<AppLayout />}>
