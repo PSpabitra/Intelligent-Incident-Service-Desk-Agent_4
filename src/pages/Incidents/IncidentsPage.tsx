@@ -16,21 +16,24 @@ export default function IncidentsPage() {
   const [loading, setLoading] = useState(false)
   const [riskFilter, setRiskFilter] = useState('')
   const [sourceFilter, setSourceFilter] = useState('')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [selected, setSelected] = useState<Incident | null>(null)
+
+  const reasons: string[] = selected ? (typeof selected.reasons === 'string' ? JSON.parse(selected.reasons) : (selected.reasons || [])) : [];
+  const actions: string[] = selected ? (typeof selected.recommended_actions === 'string' ? JSON.parse(selected.recommended_actions) : (selected.recommended_actions || [])) : [];
 
   const load = async () => {
     setLoading(true)
     try {
       const res = await api.get('/api/incidents/', {
         params: {
-          page, per_page: perPage,
-          risk_level: riskFilter,
-          source: sourceFilter,
+          page: 1,
+          per_page: 10,
         }
       })
       setIncidents(res.data.incidents)
       setTotal(res.data.total)
-    } catch (e) { 
+    } catch (e) {
       console.error('API fetch failed.', e)
       setIncidents([])
       setTotal(0)
@@ -38,9 +41,20 @@ export default function IncidentsPage() {
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [page, riskFilter, sourceFilter])
+  useEffect(() => { load() }, [])
 
-  const totalPages = Math.ceil(total / perPage)
+  const filteredIncidents = incidents.filter(inc => {
+    const matchesRisk = !riskFilter || inc.risk_level === riskFilter;
+    const matchesSource = !sourceFilter || inc.source === sourceFilter;
+    return matchesRisk && matchesSource;
+  }).sort((a, b) => {
+    const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+  });
+
+  const totalPages = Math.ceil(filteredIncidents.length / perPage);
+  const paginatedIncidents = filteredIncidents.slice((page - 1) * perPage, page * perPage);
 
   return (
     <div className="p-8 max-w-[1600px] mx-auto min-h-screen" style={{ background: '#f8fafc', fontFamily: "'DM Sans', sans-serif" }}>
@@ -55,17 +69,17 @@ export default function IncidentsPage() {
               <AlertTriangle size={14} style={{ color: '#ef4444' }} />
               Active Monitoring
             </div>
-            <span className="text-xs">{total} total records detected</span>
+            <span className="text-xs">{filteredIncidents.length} total records detected</span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="relative group">
+          {/* <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-            <input type="text" placeholder="Search incidents..." 
+            <input type="text" placeholder="Search incidents..."
               className="pl-12 pr-6 py-3 rounded-2xl text-sm outline-none transition-all border border-slate-200 bg-slate-100/40 w-64 focus:w-80"
               style={{ color: 'var(--text-primary)' }} />
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -109,10 +123,10 @@ export default function IncidentsPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Main Table View */}
-        <div className={`xl:col-span-2 transition-all duration-500 ${selected ? 'opacity-90 scale-[0.98]' : 'opacity-100 scale-100'}`}>
-          <div className="rounded-[40px] border shadow-2xl overflow-hidden"
+        <div className="xl:col-span-3 transition-all duration-500">
+          <div className="rounded-[40px] border overflow-hidden"
             style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(40px)', borderColor: 'rgba(0, 0, 0, 0.05)' }}>
-            
+
             {loading ? (
               <div className="flex flex-col items-center justify-center h-[500px] gap-4">
                 <Loader2 size={48} className="animate-spin" style={{ color: '#3b82f6' }} />
@@ -123,19 +137,30 @@ export default function IncidentsPage() {
                 <table className="w-full text-left">
                   <thead>
                     <tr style={{ background: 'rgba(241, 245, 249, 0.5)' }}>
-                      {['Identity', 'Status', 'Risk Control', 'Priority'].map(h => (
-                        <th key={h} className="px-8 py-6 text-[10px] font-black uppercase tracking-widest" style={{ color: '#64748b' }}>{h}</th>
+                      {['Title', 'Status', 'Source', 'Risk Level', 'Risk Score', 'Priority'].map(h => (
+                        <th key={h} className="px-4 py-4 text-[10px] font-black uppercase tracking-widest" style={{ color: '#64748b' }}>{h}</th>
                       ))}
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-slate-100/50 transition-colors" 
+                        style={{ color: '#64748b' }}
+                        onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Created At
+                          <span className="text-xs">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
+                        </div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
-                    {incidents.length === 0 ? (
+                    {paginatedIncidents.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-8 py-24 text-center text-slate-500 font-medium">
+                        <td colSpan={7} className="px-4 py-24 text-center text-slate-500 font-medium">
                           No active incidents match current segment filters.
                         </td>
                       </tr>
-                    ) : incidents.map((inc) => (
+                    ) : paginatedIncidents.map((inc) => (
                       <tr
                         key={inc.id}
                         onClick={() => setSelected(selected?.id === inc.id ? null : inc)}
@@ -143,37 +168,29 @@ export default function IncidentsPage() {
                         style={{
                           background: selected?.id === inc.id ? 'rgba(59,130,246,0.08)' : undefined
                         }}>
-                        <td className="px-8 py-7">
-                          <div className="flex flex-col gap-1">
-                            <span className="font-mono text-xs font-bold" style={{ color: '#60a5fa' }}>{inc.ticket_id}</span>
-                            <span className="text-sm font-bold text-slate-900 truncate max-w-[200px]">{inc.title}</span>
-                          </div>
+                        <td className="px-4 py-4 text-sm font-bold text-slate-900 truncate max-w-[200px]">{inc.title}</td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-600 capitalize">{inc.status}</td>
+                        <td className="px-4 py-4 text-[10px] font-bold uppercase text-slate-600">{inc.source}</td>
+                        <td className="px-4 py-4">
+                          <RiskBadge level={inc.risk_level} size="sm" />
                         </td>
-                        <td className="px-8 py-7">
-                          <div className="flex flex-col gap-1">
-                            <span className="text-xs font-bold text-slate-600 capitalize">{inc.status}</span>
-                            <span className="text-[10px] font-bold uppercase text-slate-600">{inc.source}</span>
-                          </div>
+                        <td className="px-4 py-4 text-lg font-black" style={{
+                          color: inc.risk_score && inc.risk_score >= 70 ? '#ef4444' : inc.risk_score && inc.risk_score >= 40 ? '#f59e0b' : '#22c55e'
+                        }}>
+                          {inc.risk_score?.toFixed(0)}%
                         </td>
-                        <td className="px-8 py-7">
-                          <div className="flex items-center gap-4">
-                            <RiskBadge level={inc.risk_level} size="sm" />
-                            <span className="text-lg font-black" style={{ 
-                              color: inc.risk_score && inc.risk_score >= 70 ? '#ef4444' : inc.risk_score && inc.risk_score >= 40 ? '#f59e0b' : '#22c55e' 
-                            }}>
-                              {inc.risk_score?.toFixed(0)}%
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-8 py-7">
+                        <td className="px-4 py-4">
                           <span className="text-xs font-black uppercase px-3 py-1.5 rounded-xl"
-                            style={{ 
+                            style={{
                               background: `${PRIORITY_COLOR[inc.priority] || '#94a3b8'}15`,
                               color: PRIORITY_COLOR[inc.priority] || '#94a3b8',
                               border: `1px solid ${PRIORITY_COLOR[inc.priority] || '#94a3b8'}30`
                             }}>
                             {inc.priority}
                           </span>
+                        </td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-700">
+                          {inc.created_at ? new Date(inc.created_at).toLocaleString() : 'N/A'}
                         </td>
                       </tr>
                     ))}
@@ -184,77 +201,59 @@ export default function IncidentsPage() {
           </div>
         </div>
 
-        {/* Detail Panel */}
-        <div className={`transition-all duration-500 transform ${selected ? 'translate-x-0 opacity-100 pointer-events-auto' : 'translate-x-12 opacity-0 pointer-events-none absolute right-0'}`}>
+        {/* Backdrop */}
+        {selected && (
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" onClick={() => setSelected(null)} />
+        )}
+
+        {/* Detail Drawer */}
+        <div className={`fixed inset-y-0 right-0 w-[600px] bg-white shadow-2xl z-50 transform transition-transform duration-500 overflow-y-auto ${selected ? 'translate-x-0' : 'translate-x-full'}`}>
           {selected && (
-            <div className="rounded-[40px] border shadow-2xl overflow-hidden sticky top-8"
-              style={{ background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(50px)', borderColor: 'rgba(59, 130, 246, 0.2)' }}>
-              <div className="p-8 border-b" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-3">
-                    <span className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                      <AlertTriangle size={20} />
-                    </span>
-                    <span className="font-mono text-lg font-black text-slate-900">{selected.ticket_id}</span>
-                  </div>
-                  <button onClick={() => setSelected(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
-                    <span className="text-slate-500 text-sm">✕</span>
-                  </button>
+            <div className="p-8">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                    <AlertTriangle size={20} />
+                  </span>
+                  <span className="font-mono text-lg font-black text-slate-900">{selected.ticket_id}</span>
                 </div>
+                <button onClick={() => setSelected(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+                  <span className="text-slate-500 text-sm">✕</span>
+                </button>
+              </div>
 
-                <div className="space-y-4 mb-8">
-                  <h3 className="text-2xl font-bold text-slate-900 leading-tight">{selected.title}</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{selected.description}</p>
+              {/* Summary */}
+              <div className="space-y-2 mb-6">
+                <p className="text-[10px] font-black text-slate-500 uppercase">Summary</p>
+                <h3 className="text-xl font-bold text-slate-900 leading-tight">{(selected as any).summary || selected.title}</h3>
+              </div>
+
+              {/* Solution */}
+              <div className="space-y-2 mb-6">
+                <p className="text-[10px] font-black text-slate-500 uppercase">Solution</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{(selected as any).solution || selected.description}</p>
+              </div>
+
+              {/* Grid for Risk Score and Resolution Time */}
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Risk Score</p>
+                  <p className="text-lg font-black" style={{ 
+                    color: selected.risk_score && selected.risk_score >= 70 ? '#ef4444' : selected.risk_score && selected.risk_score >= 40 ? '#f59e0b' : '#22c55e' 
+                  }}>
+                    {selected.risk_score ? `${Number(selected.risk_score).toFixed(0)}%` : 'N/A'}
+                  </p>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                    <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Assignee</p>
-                    <p className="text-sm font-bold text-slate-900">{selected.assignee}</p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                    <p className="text-[10px] font-black text-slate-500 uppercase mb-1">SLA Deadline</p>
-                    <p className="text-sm font-bold text-red-400">{selected.sla_due_at ? new Date(selected.sla_due_at).toLocaleTimeString() : 'N/A'}</p>
-                  </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Est. Resolution Time</p>
+                  <p className="text-sm font-bold text-slate-900">{(selected as any).estimated_resolution_time || 'N/A'}</p>
                 </div>
               </div>
 
-              <div className="p-8 space-y-8">
-                {selected.reasons && selected.reasons.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-1.5 h-4 rounded-full bg-red-500" />
-                      <p className="text-xs font-black uppercase tracking-widest text-red-500">Risk Vectors</p>
-                    </div>
-                    <ul className="space-y-3">
-                      {selected.reasons.map((r, i) => (
-                        <li key={i} className="p-4 rounded-2xl text-xs font-bold bg-red-500/5 border border-red-500/10 text-slate-700">
-                          {r}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {selected.recommended_actions && selected.recommended_actions.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-1.5 h-4 rounded-full bg-green-500" />
-                      <p className="text-xs font-black uppercase tracking-widest text-green-500">Resolution Plan</p>
-                    </div>
-                    <ul className="space-y-3">
-                      {selected.recommended_actions.map((a, i) => (
-                        <li key={i} className="p-4 rounded-2xl text-xs font-bold bg-green-500/5 border border-green-500/10 text-slate-700">
-                          {a}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <div className="p-8 pt-0">
-                <button className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-slate-900 font-bold transition-all shadow-xl shadow-blue-900/20">
+              {/* Action Button */}
+              <div>
+                <button className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-xl shadow-blue-900/20">
                   Execute Mitigation Suite
                 </button>
               </div>

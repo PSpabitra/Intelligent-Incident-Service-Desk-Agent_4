@@ -6,13 +6,13 @@ export default function Header() {
 
   return (
     <header className="h-14 flex items-center justify-between px-6 border-b" style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-      <div className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+      <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
         Incident Response Management
       </div>
       <div className="flex items-center gap-6">
-        <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+        {/* <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
           System Status: <span className="text-green-500 font-bold">Optimal</span>
-        </div>
+        </div> */}
         
         {/* Profile */}
         <div className="flex items-center gap-3">
