@@ -4,12 +4,12 @@
 @tailwind utilities;
 
 :root {
-  --bg-primary:    #0f172a;
-  --bg-secondary:  #1e293b;
-  --bg-card:       #1e2d40;
-  --border:        #334155;
-  --text-primary:  #f1f5f9;
-  --text-secondary:#94a3b8;
+  --bg-primary:    #f8fafc;
+  --bg-secondary:  #f1f5f9;
+  --bg-card:       #ffffff;
+  --border:        #e2e8f0;
+  --text-primary:  #0f172a;
+  --text-secondary:#475569;
   --accent-blue:   #3b82f6;
   --risk-high:     #ef4444;
   --risk-medium:   #f59e0b;

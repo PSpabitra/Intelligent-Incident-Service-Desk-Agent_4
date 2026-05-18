@@ -40,6 +40,7 @@ export interface Connector {
   connector_type: 'jira' | 'servicenow'
   base_url: string
   username: string
+  app_id?: string | null
   is_active: boolean
   last_synced_at: string | null
   created_at: string

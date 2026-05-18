@@ -27,7 +27,7 @@ export default function Sidebar() {
       <div className="p-6 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="w-9 h-9 rounded-lg flex items-center justify-center"
           style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}>
-          <ShieldAlert size={20} className="text-white" />
+          <ShieldAlert size={20} className="text-slate-900" />
         </div>
         <div>
           <div className="font-semibold text-sm leading-tight" style={{ color: 'var(--text-primary)' }}>SLA Risk</div>
@@ -44,8 +44,8 @@ export default function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                 isActive
-                  ? 'text-white font-medium'
-                  : 'hover:bg-white/5'
+                  ? 'text-slate-900 font-medium'
+                  : 'hover:bg-slate-50'
               }`
             }
             style={({ isActive }) => isActive
@@ -63,7 +63,7 @@ export default function Sidebar() {
       {/* User info */}
       <div className="p-4" style={{ borderTop: '1px solid var(--border)' }}>
         <div className="flex items-center gap-3 mb-3 px-2">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white"
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-slate-900"
             style={{ background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)' }}>
             {user?.name?.charAt(0).toUpperCase()}
           </div>
