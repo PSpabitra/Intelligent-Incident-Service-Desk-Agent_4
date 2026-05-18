@@ -5,6 +5,38 @@ export default function RunbooksPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      alert('Please select a file first!');
+      return;
+    }
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}documents/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        alert('File uploaded successfully!');
+        setIsModalOpen(false);
+        setSelectedFile(null);
+      } else {
+        alert('Upload failed!');
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Error uploading file!');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const stats = [
     { label: 'TOTAL ARTICLES', value: '4', icon: Book, color: '#3b82f6' },
@@ -206,8 +238,14 @@ export default function RunbooksPage() {
             >
               <Upload size={32} className="text-slate-400" />
               <div className="text-center">
-                <p className="text-sm font-bold text-slate-900">Click to upload or drag and drop</p>
-                <p className="text-xs text-slate-500 mt-1">or select a file from your computer</p>
+                {selectedFile ? (
+                  <p className="text-sm font-bold text-blue-600">{selectedFile.name}</p>
+                ) : (
+                  <>
+                    <p className="text-sm font-bold text-slate-900">Click to upload or drag and drop</p>
+                    <p className="text-xs text-slate-500 mt-1">or select a file from your computer</p>
+                  </>
+                )}
               </div>
               <input 
                 id="file-upload" 
@@ -222,9 +260,7 @@ export default function RunbooksPage() {
                       e.target.value = ''; // Reset input
                       return;
                     }
-                    console.log('File selected:', file.name);
-                    // Handle file upload logic here or just close modal for now
-                    setIsModalOpen(false);
+                    setSelectedFile(file);
                   }
                 }}
               />
@@ -232,24 +268,20 @@ export default function RunbooksPage() {
 
             <div className="flex items-center justify-end gap-3 mt-6">
               <button 
-                onClick={() => setIsModalOpen(false)} 
+                onClick={() => { setIsModalOpen(false); setSelectedFile(null); }} 
                 className="px-5 py-2.5 rounded-xl text-xs font-black uppercase text-slate-600 hover:bg-slate-100 transition-colors"
+                disabled={uploading}
               >
                 Cancel
               </button>
               <button 
-                className="px-5 py-2.5 rounded-xl text-xs font-black uppercase bg-blue-600 hover:bg-blue-500 text-white transition-colors shadow-lg shadow-blue-900/20"
-                onClick={() => {
-                  const fileInput = document.getElementById('file-upload') as HTMLInputElement;
-                  if (fileInput.files?.[0]) {
-                    console.log('Uploading:', fileInput.files[0].name);
-                    setIsModalOpen(false);
-                  } else {
-                    alert('Please select a file first!');
-                  }
-                }}
+                className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase transition-colors shadow-lg ${
+                  uploading ? 'bg-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/20'
+                }`}
+                onClick={handleUpload}
+                disabled={uploading}
               >
-                Upload
+                {uploading ? 'Uploading...' : 'Upload'}
               </button>
             </div>
           </div>

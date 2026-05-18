@@ -1,6 +1,6 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Plug, AlertTriangle, LogOut, Activity, ShieldAlert, Book } from 'lucide-react'
+import { LayoutDashboard, Plug, AlertTriangle, LogOut, Activity, ShieldAlert, Book, MessageSquare } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 
 const nav = [
@@ -8,6 +8,7 @@ const nav = [
   { to: '/connectors', label: 'Connectors', icon: Plug },
   { to: '/incidents',  label: 'Incidents',  icon: AlertTriangle },
   { to: '/runbooks',   label: 'Knowledge Base',   icon: Book },
+  { to: '/chat',       label: 'Speak to the SLA wisdom', icon: MessageSquare },
 ]
 
 export default function Sidebar() {
