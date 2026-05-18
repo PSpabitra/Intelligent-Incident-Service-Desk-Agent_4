@@ -5,8 +5,9 @@ import { useAuthStore } from '../../store/authStore'
 
 const nav = [
   { to: '/dashboard',  label: 'Dashboard',  icon: LayoutDashboard },
+    { to: '/connectors', label: 'Connectors', icon: Plug },
   { to: '/incidents',  label: 'Incidents',  icon: AlertTriangle },
-  { to: '/connectors', label: 'Connectors', icon: Plug },
+
 ]
 
 export default function Sidebar() {
