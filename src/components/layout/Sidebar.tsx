@@ -7,7 +7,7 @@ const nav = [
   { to: '/dashboard',  label: 'Dashboard',  icon: LayoutDashboard },
   { to: '/connectors', label: 'Connectors', icon: Plug },
   { to: '/incidents',  label: 'Incidents',  icon: AlertTriangle },
-  { to: '/runbooks',   label: 'Runbooks',   icon: Book },
+  { to: '/runbooks',   label: 'Knowledge Base',   icon: Book },
 ]
 
 export default function Sidebar() {

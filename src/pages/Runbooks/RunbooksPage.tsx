@@ -4,6 +4,7 @@ import { Book, Upload, Search, Filter, FileText, Database, Layers, Clock, Eye, T
 export default function RunbooksPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const stats = [
     { label: 'TOTAL RUNBOOKS', value: '4', icon: Book, color: '#3b82f6' },
@@ -51,10 +52,13 @@ export default function RunbooksPage() {
           </p>
         </div>
 
-        {/* <button className="flex items-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-all shadow-xl shadow-blue-900/20 text-sm">
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-all shadow-xl shadow-blue-900/20 text-sm"
+        >
           <Upload size={18} />
-          UPLOAD RUNBOOK
-        </button> */}
+          UPLOAD ARTICLE
+        </button>
       </div>
 
       {/* Stats Cards */}
@@ -176,6 +180,81 @@ export default function RunbooksPage() {
           </table>
         </div>
       </div>
+
+      {/* Upload Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-[32px] w-full max-w-lg p-8 shadow-2xl border" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                  <Upload size={20} />
+                </span>
+                <h3 className="text-xl font-bold text-slate-900">Upload Article</h3>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
+                <span className="text-slate-500 text-sm">✕</span>
+              </button>
+            </div>
+
+            <p className="text-sm text-slate-500 mb-6">
+              Supported formats: <strong>PDF, DOCX</strong>. Max file size: <strong>20 MB</strong>.
+            </p>
+
+            <div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-4 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer"
+              onClick={() => document.getElementById('file-upload')?.click()}
+            >
+              <Upload size={32} className="text-slate-400" />
+              <div className="text-center">
+                <p className="text-sm font-bold text-slate-900">Click to upload or drag and drop</p>
+                <p className="text-xs text-slate-500 mt-1">or select a file from your computer</p>
+              </div>
+              <input 
+                id="file-upload" 
+                type="file" 
+                className="hidden" 
+                accept=".pdf,.docx"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 20 * 1024 * 1024) {
+                      alert('File size exceeds 20 MB limit!');
+                      e.target.value = ''; // Reset input
+                      return;
+                    }
+                    console.log('File selected:', file.name);
+                    // Handle file upload logic here or just close modal for now
+                    setIsModalOpen(false);
+                  }
+                }}
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 mt-6">
+              <button 
+                onClick={() => setIsModalOpen(false)} 
+                className="px-5 py-2.5 rounded-xl text-xs font-black uppercase text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                className="px-5 py-2.5 rounded-xl text-xs font-black uppercase bg-blue-600 hover:bg-blue-500 text-white transition-colors shadow-lg shadow-blue-900/20"
+                onClick={() => {
+                  const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+                  if (fileInput.files?.[0]) {
+                    console.log('Uploading:', fileInput.files[0].name);
+                    setIsModalOpen(false);
+                  } else {
+                    alert('Please select a file first!');
+                  }
+                }}
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -216,7 +216,7 @@ export default function IncidentsPage() {
                   <span className="w-10 h-10 rounded-2xl flex items-center justify-center bg-blue-500/10 border border-blue-500/20 text-blue-400">
                     <AlertTriangle size={20} />
                   </span>
-                  <span className="font-mono text-lg font-black text-slate-900">{selected.ticket_id}</span>
+                  <span className="font-mono text-lg font-black text-slate-900">{selected.title}</span>
                 </div>
                 <button onClick={() => setSelected(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
                   <span className="text-slate-500 text-sm">✕</span>
