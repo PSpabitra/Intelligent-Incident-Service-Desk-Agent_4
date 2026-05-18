@@ -7,7 +7,7 @@ export default function RunbooksPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const stats = [
-    { label: 'TOTAL RUNBOOKS', value: '4', icon: Book, color: '#3b82f6' },
+    { label: 'TOTAL ARTICLES', value: '4', icon: Book, color: '#3b82f6' },
     { label: 'ACTIVE', value: '0', icon: FileText, color: '#22c55e' },
     { label: 'PROCESSING', value: '0', icon: Database, color: '#f59e0b' },
     { label: 'INDEXED CHUNKS', value: '140', icon: Layers, color: '#06b6d4' },
