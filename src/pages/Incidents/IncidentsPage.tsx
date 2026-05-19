@@ -209,9 +209,9 @@ export default function IncidentsPage() {
                           <RiskBadge level={inc.risk_level} size="sm" />
                         </td>
                         <td className="px-4 py-4 text-lg font-black" style={{
-                          color: inc.risk_score && inc.risk_score >= 70 ? '#ef4444' : inc.risk_score && inc.risk_score >= 40 ? '#f59e0b' : '#22c55e'
+                          color: inc.ai_risk_score && inc.ai_risk_score >= 70 ? '#ef4444' : inc.ai_risk_score && inc.ai_risk_score >= 40 ? '#f59e0b' : '#22c55e'
                         }}>
-                          {inc.risk_score?.toFixed(0)}%
+                          {inc.ai_risk_score?.toFixed(0)}%
                         </td>
                         <td className="px-4 py-4">
                           <span className="text-xs font-black uppercase px-3 py-1.5 rounded-xl"
@@ -298,9 +298,9 @@ export default function IncidentsPage() {
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                   <p className="text-[12px] font-black text-slate-500 uppercase mb-1">Risk Score</p>
                   <p className="text-lg font-black" style={{
-                    color: selected.risk_score && selected.risk_score >= 70 ? '#ef4444' : selected.risk_score && selected.risk_score >= 40 ? '#f59e0b' : '#22c55e'
+                    color: (selected as any).ai_risk_score && (selected as any).ai_risk_score >= 70 ? '#ef4444' : (selected as any).ai_risk_score && (selected as any).ai_risk_score >= 40 ? '#f59e0b' : '#22c55e'
                   }}>
-                    {selected.risk_score ? `${Number(selected.risk_score).toFixed(0)}%` : 'N/A'}
+                    {(selected as any).ai_risk_score ? `${Number((selected as any).ai_risk_score).toFixed(0)}%` : 'N/A'}
                   </p>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
@@ -353,7 +353,7 @@ export default function IncidentsPage() {
                     <span className="text-xs font-black" style={{ color: '#f43f5e' }}>{(selected as any).sla_breach_score?.toFixed(1) || '0.0'}%</span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-rose-500 rounded-full transition-all duration-1000" style={{ width: `${(selected as any).sla_breach_score || 0}%` }} />
+                    <div className="h-full bg-rose-500 rounded-full transition-all duration-1000" style={{ width: `${(selected as any).sla_breach_score|| 0}%` }} />
                   </div>
                 </div>
               </div>

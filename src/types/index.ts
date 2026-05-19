@@ -3,6 +3,7 @@ export type Priority  = 'critical' | 'high' | 'medium' | 'low'
 export type Source    = 'jira' | 'servicenow'
 
 export interface Incident {
+  ai_risk_score: number
   id: number
   source: Source
   ticket_id: string
