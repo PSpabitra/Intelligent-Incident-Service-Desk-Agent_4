@@ -403,8 +403,8 @@ export default function ChatPage() {
           {selectedIncident ? (
             <div>
               {/* Scope Lock Badge */}
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-xl">
+              {/* <div className="flex items-center gap-2 mb-3"> */}
+                {/* <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-xl">
                   <ShieldCheck size={14} className="text-blue-600" />
                   <span className="text-xs font-black uppercase tracking-wider text-blue-600">
                     Scope Locked
@@ -418,7 +418,7 @@ export default function ChatPage() {
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-[10px] font-black uppercase text-slate-500">RAG Active</span>
                 </div>
-              </div>
+              </div> */}
 
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-xl font-extrabold text-slate-900 leading-tight">

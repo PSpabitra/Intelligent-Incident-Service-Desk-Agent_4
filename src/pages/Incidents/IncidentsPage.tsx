@@ -284,13 +284,13 @@ export default function IncidentsPage() {
               {/* Summary */}
               <div className="space-y-2 mb-6">
                 <p className="text-[10px] font-black text-slate-500 uppercase">Summary</p>
-                <h3 className="text-xl font-bold text-slate-900 leading-tight">{(selected as any).ai_summary || selected.title}</h3>
+                <h3 className="text-xl font-bold text-slate-900 leading-tight">{(selected as any).summary || selected.title}</h3>
               </div>
 
               {/* Solution */}
               <div className="space-y-2 mb-6">
                 <p className="text-[10px] font-black text-slate-500 uppercase">Solution</p>
-                <p className="text-sm text-slate-700 leading-relaxed">{(selected as any).ai_solution || selected.description}</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{(selected as any).solution || selected.description}</p>
               </div>
 
               {/* Grid for Risk Score and Resolution Time */}
