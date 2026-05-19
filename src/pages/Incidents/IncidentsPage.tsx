@@ -285,7 +285,7 @@ export default function IncidentsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-700">Impact Score</span>
-                    <span className="text-xs font-black" style={{ color: '#14d134ff' }}>{(selected as any).impact_score?.toFixed(1) || '0.0'}</span>
+                    <span className="text-xs font-black" style={{ color: '#14d134ff' }}>{(selected as any).impact_score?.toFixed(1) || '0.0'}%</span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-green-500 rounded-full transition-all duration-1000" style={{ width: `${(selected as any).impact_score || 0}%` }} />
@@ -296,7 +296,7 @@ export default function IncidentsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-700">Urgency Score</span>
-                    <span className="text-xs font-black" style={{ color: '#f97316' }}>{(selected as any).urgency_score?.toFixed(1) || '0.0'}</span>
+                    <span className="text-xs font-black" style={{ color: '#f97316' }}>{(selected as any).urgency_score?.toFixed(1) || '0.0'}%</span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-orange-500 rounded-full transition-all duration-1000" style={{ width: `${(selected as any).urgency_score || 0}%` }} />
@@ -307,7 +307,7 @@ export default function IncidentsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-700">Complexity Score</span>
-                    <span className="text-xs font-black" style={{ color: '#8b5cf6' }}>{(selected as any).complexity_score?.toFixed(1) || '0.0'}</span>
+                    <span className="text-xs font-black" style={{ color: '#8b5cf6' }}>{(selected as any).complexity_score?.toFixed(1) || '0.0'}%</span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-purple-500 rounded-full transition-all duration-1000" style={{ width: `${(selected as any).complexity_score || 0}%` }} />
@@ -318,7 +318,7 @@ export default function IncidentsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-700">SLA Breach Score</span>
-                    <span className="text-xs font-black" style={{ color: '#f43f5e' }}>{(selected as any).sla_breach_score?.toFixed(1) || '0.0'}</span>
+                    <span className="text-xs font-black" style={{ color: '#f43f5e' }}>{(selected as any).sla_breach_score?.toFixed(1) || '0.0'}%</span>
                   </div>
                   <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div className="h-full bg-rose-500 rounded-full transition-all duration-1000" style={{ width: `${(selected as any).sla_breach_score || 0}%` }} />
