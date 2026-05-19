@@ -12,7 +12,7 @@ export default function IncidentsPage() {
   const [incidents, setIncidents] = useState<Incident[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [perPage] = useState(20)
+  const [perPage] = useState(5)
   const [loading, setLoading] = useState(false)
   const [riskFilter, setRiskFilter] = useState('')
   const [sourceFilter, setSourceFilter] = useState('')
@@ -27,12 +27,12 @@ export default function IncidentsPage() {
     try {
       const res = await api.get('/api/incidents/', {
         params: {
-          page: 1,
-          per_page: 10,
+          page: page,
+          per_page: 5,
         }
       })
       setIncidents(res.data.incidents)
-      setTotal(res.data.total)
+      setTotal(res.data.total || res.data.incidents.length)
     } catch (e) {
       console.error('API fetch failed.', e)
       setIncidents([])
@@ -41,7 +41,7 @@ export default function IncidentsPage() {
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [page])
 
   const filteredIncidents = incidents.filter(inc => {
     const matchesRisk = !riskFilter || inc.risk_level === riskFilter;
@@ -53,11 +53,11 @@ export default function IncidentsPage() {
     return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
 
-  const totalPages = Math.ceil(filteredIncidents.length / perPage);
-  const paginatedIncidents = filteredIncidents.slice((page - 1) * perPage, page * perPage);
+  const totalPages = Math.ceil(total / perPage);
+  const paginatedIncidents = filteredIncidents;
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto min-h-screen" style={{ background: '#f8fafc', fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="p-8 max-w-[1600px] mx-auto" style={{ background: '#f8fafc', fontFamily: "'DM Sans', sans-serif" }}>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 sticky top-0 bg-[#f8fafc] z-10 -mx-8 px-8 py-4">
         <div>
           <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
@@ -133,14 +133,15 @@ export default function IncidentsPage() {
                 <p className="text-xs font-black uppercase tracking-[0.2em]" style={{ color: '#64748b' }}>Refreshing Stream...</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <>
+                <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr style={{ background: 'rgba(241, 245, 249, 0.5)' }}>
                       {['Title', 'Status', 'Source', 'Risk Level', 'Risk Score', 'Priority'].map(h => (
                         <th key={h} className="px-4 py-4 text-[10px] font-black uppercase tracking-widest" style={{ color: '#64748b' }}>{h}</th>
                       ))}
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-slate-100/50 transition-colors" 
+                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-slate-100/50 transition-colors"
                         style={{ color: '#64748b' }}
                         onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                       >
@@ -160,7 +161,8 @@ export default function IncidentsPage() {
                           No active incidents match current segment filters.
                         </td>
                       </tr>
-                    ) : paginatedIncidents.map((inc) => (
+                    ) : (
+                      paginatedIncidents.map((inc) => (
                       <tr
                         key={inc.id}
                         onClick={() => setSelected(selected?.id === inc.id ? null : inc)}
@@ -193,10 +195,34 @@ export default function IncidentsPage() {
                           {inc.created_at ? new Date(inc.created_at).toLocaleString() : 'N/A'}
                         </td>
                       </tr>
-                    ))}
+                    )))}
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination Controls */}
+            <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-white mt-4 rounded-xl shadow-sm">
+              <button
+                onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                disabled={page === 1 || loading}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${page === 1 || loading ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+              >
+                Prev
+              </button>
+              <span className="text-xs font-bold text-slate-500">
+                Page {page} of {Math.max(1, Math.ceil(total / 5))}
+              </span>
+              <button
+                onClick={() => setPage(prev => prev + 1)}
+                disabled={page * 5 >= total || loading}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${page * 5 >= total || loading ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+              >
+                Next
+              </button>
+            </div>
+              </>
             )}
           </div>
         </div>
@@ -239,8 +265,8 @@ export default function IncidentsPage() {
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                   <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Risk Score</p>
-                  <p className="text-lg font-black" style={{ 
-                    color: selected.risk_score && selected.risk_score >= 70 ? '#ef4444' : selected.risk_score && selected.risk_score >= 40 ? '#f59e0b' : '#22c55e' 
+                  <p className="text-lg font-black" style={{
+                    color: selected.risk_score && selected.risk_score >= 70 ? '#ef4444' : selected.risk_score && selected.risk_score >= 40 ? '#f59e0b' : '#22c55e'
                   }}>
                     {selected.risk_score ? `${Number(selected.risk_score).toFixed(0)}%` : 'N/A'}
                   </p>
