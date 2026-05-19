@@ -253,7 +253,7 @@ export default function DashboardPage() {
             <table className="w-full text-left">
               <thead>
                 <tr style={{ background: 'rgba(241, 245, 249, 0.5)' }}>
-                  {['Title', 'Status', 'Source', 'Risk Level', 'Risk Score', 'Priority'].map(h => (
+                  {['Title', 'Source', 'Risk Level', 'Risk Score', 'Priority'].map(h => (
                     <th key={h} className="px-8 py-5 text-[10px] font-black uppercase tracking-widest" style={{ color: '#64748b' }}>{h}</th>
                   ))}
                 </tr>
@@ -263,15 +263,15 @@ export default function DashboardPage() {
                   <tr key={inc.ticket_id} className="transition-all duration-300 group hover:bg-slate-50">
                     <td className="px-8 py-6">
                       <div className="flex flex-col gap-1">
-                        <span className="font-mono text-xs font-black text-blue-500">{inc.ticket_id}</span>
+                        {/* <span className="font-mono text-xs font-black text-blue-500">{inc.ticket_id}</span> */}
                         <span className="text-sm font-bold text-slate-800 leading-snug">{inc.title}</span>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
+                    {/* <td className="px-8 py-6">
                       <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">
                         {inc.status}
                       </span>
-                    </td>
+                    </td> */}
                     <td className="px-8 py-6">
                       <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg ${
                         inc.source === 'jira' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'bg-green-50 text-green-600 border border-green-100'

@@ -18,6 +18,7 @@ export default function IncidentsPage() {
   const [sourceFilter, setSourceFilter] = useState('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [selected, setSelected] = useState<Incident | null>(null)
+  const [refreshCountdown, setRefreshCountdown] = useState(30)
 
   const reasons: string[] = selected ? (typeof selected.reasons === 'string' ? JSON.parse(selected.reasons) : (selected.reasons || [])) : [];
   const actions: string[] = selected ? (typeof selected.recommended_actions === 'string' ? JSON.parse(selected.recommended_actions) : (selected.recommended_actions || [])) : [];
@@ -41,7 +42,38 @@ export default function IncidentsPage() {
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [page])
+  useEffect(() => { 
+    load()
+    setRefreshCountdown(30)
+    
+    // Auto-refresh every 30 seconds
+    const intervalId = setInterval(() => {
+      // Create a silent load that doesn't trigger the loading spinner state
+      const silentLoad = async () => {
+        try {
+          const res = await api.get('/api/incidents/', {
+            params: { page: page, per_page: 5 }
+          })
+          setIncidents(res.data.incidents)
+          setTotal(res.data.total || res.data.incidents.length)
+          setRefreshCountdown(30) // Reset countdown on successful refresh
+        } catch (e) {
+          console.error('Silent API fetch failed.', e)
+        }
+      }
+      silentLoad()
+    }, 30000) // 30 seconds
+
+    // Countdown timer
+    const countdownIntervalId = setInterval(() => {
+      setRefreshCountdown(prev => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    
+    return () => {
+      clearInterval(intervalId)
+      clearInterval(countdownIntervalId)
+    }
+  }, [page])
 
   const filteredIncidents = incidents.filter(inc => {
     const matchesRisk = !riskFilter || inc.risk_level === riskFilter;
@@ -64,16 +96,16 @@ export default function IncidentsPage() {
             Incident <span style={{ color: '#3b82f6' }}>Intelligence</span>
           </h1>
           <div className="flex items-center gap-4" style={{ color: '#94a3b8' }}>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
-              style={{ background: 'rgba(30, 41, 59, 0.5)', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <AlertTriangle size={14} style={{ color: '#ef4444' }} />
-              Active Monitoring
-            </div>
             <span className="text-xs">{filteredIncidents.length} total records detected</span>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium shadow-sm"
+            style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', color: '#3b82f6' }}>
+            <Loader2 size={12} className="animate-spin" />
+            Refreshing in {refreshCountdown}s
+          </div>
           {/* <div className="relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <input type="text" placeholder="Search incidents..."
