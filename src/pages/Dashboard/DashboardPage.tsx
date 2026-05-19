@@ -253,7 +253,7 @@ export default function DashboardPage() {
             <table className="w-full text-left">
               <thead>
                 <tr style={{ background: 'rgba(241, 245, 249, 0.5)' }}>
-                  {['Identity', 'Description', 'Origin', 'Status', 'Risk Score', 'Compliance'].map(h => (
+                  {['Title', 'Status', 'Source', 'Risk Level', 'Risk Score', 'Priority'].map(h => (
                     <th key={h} className="px-8 py-5 text-[10px] font-black uppercase tracking-widest" style={{ color: '#64748b' }}>{h}</th>
                   ))}
                 </tr>
@@ -261,15 +261,35 @@ export default function DashboardPage() {
               <tbody className="divide-y" style={{ borderColor: 'rgba(0, 0, 0, 0.05)' }}>
                 {topRisk.map((inc) => (
                   <tr key={inc.ticket_id} className="transition-all duration-300 group hover:bg-slate-50">
-                    <td className="px-8 py-7">
-                      <span className="font-mono text-xs font-black text-blue-400 group-hover:text-blue-300 transition-colors">{inc.ticket_id}</span>
+                    <td className="px-8 py-6">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-mono text-xs font-black text-blue-500">{inc.ticket_id}</span>
+                        <span className="text-sm font-bold text-slate-800 leading-snug">{inc.title}</span>
+                      </div>
                     </td>
-                    <td className="px-8 py-7 text-sm font-bold text-slate-800">{inc.title}</td>
-                    <td className="px-8 py-7">
-                      <span className="text-[10px] font-black uppercase px-2 py-1 rounded-lg bg-slate-200/50 text-slate-600">{inc.source}</span>
+                    <td className="px-8 py-6">
+                      <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200">
+                        {inc.status}
+                      </span>
                     </td>
-                    <td className="px-8 py-7">
-                      <span className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl transition-all" 
+                    <td className="px-8 py-6">
+                      <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg ${
+                        inc.source === 'jira' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'bg-green-50 text-green-600 border border-green-100'
+                      }`}>
+                        {inc.source}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <RiskBadge level={inc.risk_level} size="sm" />
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-end gap-1">
+                        <span className="text-xl font-black text-slate-900">{inc.risk_score?.toFixed(0)}</span>
+                        <span className="text-[10px] font-black text-slate-500 mb-1">%</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-[10px] font-black uppercase px-3 py-1.5 rounded-xl transition-all inline-block" 
                         style={{ 
                           background: `${PRIORITY_COLOR[inc.priority || ''] || '#94a3b8'}15`, 
                           color: PRIORITY_COLOR[inc.priority || ''] || '#94a3b8',
@@ -277,15 +297,6 @@ export default function DashboardPage() {
                         }}>
                         {inc.priority}
                       </span>
-                    </td>
-                    <td className="px-8 py-7">
-                      <div className="flex items-end gap-1">
-                        <span className="text-xl font-black text-slate-900">{inc.risk_score?.toFixed(0)}</span>
-                        <span className="text-[10px] font-black text-slate-500 mb-1">%</span>
-                      </div>
-                    </td>
-                    <td className="px-8 py-7">
-                      <RiskBadge level={inc.risk_level} size="sm" />
                     </td>
                   </tr>
                 ))}
