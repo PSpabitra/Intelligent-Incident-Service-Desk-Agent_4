@@ -284,7 +284,7 @@ export default function DashboardPage() {
                     </td>
                     <td className="px-8 py-6">
                       <div className="flex items-end gap-1">
-                        <span className="text-xl font-black text-slate-900">{inc.risk_score?.toFixed(0)}</span>
+                        <span className="text-xl font-black text-slate-900">{inc.ai_risk_score?.toFixed(0)}</span>
                         <span className="text-[10px] font-black text-slate-500 mb-1">%</span>
                       </div>
                     </td>
