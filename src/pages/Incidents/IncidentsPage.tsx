@@ -252,19 +252,19 @@ export default function IncidentsPage() {
               {/* Summary */}
               <div className="space-y-2 mb-6">
                 <p className="text-[10px] font-black text-slate-500 uppercase">Summary</p>
-                <h3 className="text-xl font-bold text-slate-900 leading-tight">{(selected as any).summary || selected.title}</h3>
+                <h3 className="text-xl font-bold text-slate-900 leading-tight">{(selected as any).ai_summary || selected.title}</h3>
               </div>
 
               {/* Solution */}
               <div className="space-y-2 mb-6">
                 <p className="text-[10px] font-black text-slate-500 uppercase">Solution</p>
-                <p className="text-sm text-slate-700 leading-relaxed">{(selected as any).solution || selected.description}</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{(selected as any).ai_solution || selected.description}</p>
               </div>
 
               {/* Grid for Risk Score and Resolution Time */}
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Risk Score</p>
+                  <p className="text-[12px] font-black text-slate-500 uppercase mb-1">Risk Score</p>
                   <p className="text-lg font-black" style={{
                     color: selected.risk_score && selected.risk_score >= 70 ? '#ef4444' : selected.risk_score && selected.risk_score >= 40 ? '#f59e0b' : '#22c55e'
                   }}>
@@ -272,17 +272,66 @@ export default function IncidentsPage() {
                   </p>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Est. Resolution Time</p>
-                  <p className="text-sm font-bold text-slate-900">{(selected as any).estimated_resolution_time || 'N/A'}</p>
+                  <p className="text-[12px] font-black text-slate-500 uppercase mb-1">Est. Resolution Time</p>
+                  <p className="text-[15px] font-bold text-slate-900">{(selected as any).estimated_resolution_time || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* Detailed Scores */}
+              <div className="mb-8 space-y-4">
+                <p className="text-[10px] font-black text-slate-500 uppercase mb-3">Score Breakdown</p>
+                
+                {/* Impact Score */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700">Impact Score</span>
+                    <span className="text-xs font-black" style={{ color: '#14d134ff' }}>{(selected as any).impact_score?.toFixed(1) || '0.0'}</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500 rounded-full transition-all duration-1000" style={{ width: `${(selected as any).impact_score || 0}%` }} />
+                  </div>
+                </div>
+
+                {/* Urgency Score */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700">Urgency Score</span>
+                    <span className="text-xs font-black" style={{ color: '#f97316' }}>{(selected as any).urgency_score?.toFixed(1) || '0.0'}</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-orange-500 rounded-full transition-all duration-1000" style={{ width: `${(selected as any).urgency_score || 0}%` }} />
+                  </div>
+                </div>
+
+                {/* Complexity Score */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700">Complexity Score</span>
+                    <span className="text-xs font-black" style={{ color: '#8b5cf6' }}>{(selected as any).complexity_score?.toFixed(1) || '0.0'}</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-purple-500 rounded-full transition-all duration-1000" style={{ width: `${(selected as any).complexity_score || 0}%` }} />
+                  </div>
+                </div>
+
+                {/* SLA Breach Score */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700">SLA Breach Score</span>
+                    <span className="text-xs font-black" style={{ color: '#f43f5e' }}>{(selected as any).sla_breach_score?.toFixed(1) || '0.0'}</span>
+                  </div>
+                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-rose-500 rounded-full transition-all duration-1000" style={{ width: `${(selected as any).sla_breach_score || 0}%` }} />
+                  </div>
                 </div>
               </div>
 
               {/* Action Button */}
-              <div>
+              {/* <div>
                 <button className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-xl shadow-blue-900/20">
                   Execute Mitigation Suite
                 </button>
-              </div>
+              </div> */}
             </div>
           )}
         </div>
