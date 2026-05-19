@@ -89,7 +89,7 @@ export default function ChatPage() {
   return (
     <div className="h-full flex overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif", background: '#f8fafc' }}>
       {/* Left Sidebar - Incident List */}
-      <div className="w-[380px] bg-white border-r border-slate-100 flex flex-col">
+      <div className="w-[380px] flex-shrink-0 bg-white border-r border-slate-100 flex flex-col">
         {/* Filters */}
         <div className="p-6 border-bottom border-slate-100">
           <div className="flex items-center justify-between mb-4">
@@ -175,7 +175,7 @@ export default function ChatPage() {
       </div>
 
       {/* Right Area - Chat */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col">
         {/* Top Section - Incident Details */}
         <div className="bg-white p-6 border-b border-slate-100">
           {selectedIncident ? (
@@ -214,7 +214,7 @@ export default function ChatPage() {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-8 space-y-6">
           {messages.map((msg, i) => (
-            <div key={i} className={`flex items-start gap-4 ${msg.role === 'user' ? 'justify-end' : ''}`}>
+            <div key={i} className={`flex w-full items-start gap-4 ${msg.role === 'user' ? 'justify-end' : ''}`}>
               {msg.role === 'assistant' && (
                 <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-600 flex-shrink-0">
                   <Bot size={16} />
