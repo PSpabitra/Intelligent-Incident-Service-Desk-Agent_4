@@ -16,6 +16,8 @@ export default function ChatPage() {
   const [selectedIncident, setSelectedIncident] = useState<any>(null)
   const [incidents, setIncidents] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalIncidents, setTotalIncidents] = useState(0)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -38,9 +40,10 @@ export default function ChatPage() {
       setLoading(true)
       try {
         const res = await api.get('/api/incidents/', {
-          params: { page: 1, per_page: 20 }
+          params: { page: currentPage, per_page: 4 }
         })
         setIncidents(res.data.incidents)
+        setTotalIncidents(res.data.total || res.data.incidents.length)
       } catch (err) {
         console.error('Failed to load incidents:', err)
       } finally {
@@ -48,7 +51,7 @@ export default function ChatPage() {
       }
     }
     loadIncidents()
-  }, [])
+  }, [currentPage])
 
   const handleSend = () => {
     if (!input.trim() || !selectedIncident) return
@@ -171,6 +174,31 @@ export default function ChatPage() {
               </div>
             ))
           )}
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-white shrink-0">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1 || loading}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              currentPage === 1 || loading ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            Prev
+          </button>
+          <span className="text-xs font-bold text-slate-500">
+            Page {currentPage} of {Math.max(1, Math.ceil(totalIncidents / 4))}
+          </span>
+          <button
+            onClick={() => setCurrentPage(prev => prev + 1)}
+            disabled={currentPage * 4 >= totalIncidents || loading}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              currentPage * 4 >= totalIncidents || loading ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            Next
+          </button>
         </div>
       </div>
 
