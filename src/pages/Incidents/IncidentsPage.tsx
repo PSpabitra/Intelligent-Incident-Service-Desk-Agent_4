@@ -86,6 +86,10 @@ export default function IncidentsPage() {
     const matchesRisk = !riskFilter || inc.risk_level === riskFilter;
     const matchesSource = !sourceFilter || inc.source === sourceFilter;
     return matchesRisk && matchesSource;
+  }).sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
+    return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
   });
 
   const totalPages = Math.ceil(total / perPage);
