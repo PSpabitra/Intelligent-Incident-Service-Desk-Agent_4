@@ -10,7 +10,6 @@ const PRIORITY_COLOR: Record<string, string> = {
 
 export default function IncidentsPage() {
   const [incidents, setIncidents] = useState<Incident[]>([])
-  const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [perPage] = useState(5)
   const [loading, setLoading] = useState(false)
@@ -20,26 +19,20 @@ export default function IncidentsPage() {
   const [selected, setSelected] = useState<Incident | null>(null)
   const [refreshCountdown, setRefreshCountdown] = useState(30)
 
-  const reasons: string[] = selected ? (typeof selected.reasons === 'string' ? JSON.parse(selected.reasons) : (selected.reasons || [])) : [];
-  const actions: string[] = selected ? (typeof selected.recommended_actions === 'string' ? JSON.parse(selected.recommended_actions) : (selected.recommended_actions || [])) : [];
-
+  // Fetch all records at once (up to 1000) so React can sort and paginate them correctly
   const load = async () => {
     setLoading(true)
     try {
       const res = await api.get('/api/incidents/', {
         params: {
-          page: page,
-          per_page: perPage,
-          sort_by: 'created_at',
-          sort_order: sortOrder,
+          page: 1,
+          per_page: 10000, 
         },
       })
-      setIncidents(res.data.incidents)
-      setTotal(res.data.total || res.data.incidents.length)
+      setIncidents(res.data.incidents || [])
     } catch (e) {
       console.error('API fetch failed.', e)
       setIncidents([])
-      setTotal(0)
     }
     setLoading(false)
   }
@@ -50,26 +43,22 @@ export default function IncidentsPage() {
     
     // Auto-refresh every 30 seconds
     const intervalId = setInterval(() => {
-      // Create a silent load that doesn't trigger the loading spinner state
       const silentLoad = async () => {
         try {
           const res = await api.get('/api/incidents/', {
             params: {
-              page: page,
-              per_page: perPage,
-              sort_by: 'created_at',
-              sort_order: sortOrder,
+              page: 1,
+              per_page: 1000,
             },
           });
-          setIncidents(res.data.incidents)
-          setTotal(res.data.total || res.data.incidents.length)
-          setRefreshCountdown(30) // Reset countdown on successful refresh
+          setIncidents(res.data.incidents || [])
+          setRefreshCountdown(30)
         } catch (e) {
           console.error('Silent API fetch failed.', e)
         }
       }
       silentLoad()
-    }, 30000) // 30 seconds
+    }, 30000)
 
     // Countdown timer
     const countdownIntervalId = setInterval(() => {
@@ -80,20 +69,26 @@ export default function IncidentsPage() {
       clearInterval(intervalId)
       clearInterval(countdownIntervalId)
     }
-  }, [page, perPage, sortOrder]);
+  }, []); // Empty dependency array: we only fetch on mount and interval now
 
+  // 1. FILTER the data locally
   const filteredIncidents = incidents.filter(inc => {
     const matchesRisk = !riskFilter || inc.risk_level === riskFilter;
     const matchesSource = !sourceFilter || inc.source === sourceFilter;
     return matchesRisk && matchesSource;
-  }).sort((a, b) => {
+  });
+
+  // 2. SORT the filtered data locally
+  const sortedIncidents = [...filteredIncidents].sort((a, b) => {
     const dateA = new Date(a.created_at).getTime();
     const dateB = new Date(b.created_at).getTime();
     return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
   });
 
-  const totalPages = Math.ceil(total / perPage);
-  const paginatedIncidents = filteredIncidents;
+  // 3. PAGINATE the sorted data locally
+  const totalPages = Math.max(1, Math.ceil(sortedIncidents.length / perPage));
+  const startIndex = (page - 1) * perPage;
+  const paginatedIncidents = sortedIncidents.slice(startIndex, startIndex + perPage);
 
   return (
     <div className="p-8 max-w-[1600px] mx-auto" style={{ background: '#f8fafc', fontFamily: "'DM Sans', sans-serif" }}>
@@ -103,7 +98,7 @@ export default function IncidentsPage() {
             Incident <span style={{ color: '#3b82f6' }}>Intelligence</span>
           </h1>
           <div className="flex items-center gap-4" style={{ color: '#94a3b8' }}>
-            <span className="text-xs">{filteredIncidents.length} total records detected</span>
+            <span className="text-xs">{sortedIncidents.length} total records detected</span>
           </div>
         </div>
 
@@ -113,12 +108,6 @@ export default function IncidentsPage() {
             <Loader2 size={12} className="animate-spin" />
             Refreshing in {refreshCountdown}s
           </div>
-          {/* <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-            <input type="text" placeholder="Search incidents..."
-              className="pl-12 pr-6 py-3 rounded-2xl text-sm outline-none transition-all border border-slate-200 bg-slate-100/40 w-64 focus:w-80"
-              style={{ color: 'var(--text-primary)' }} />
-          </div> */}
         </div>
       </div>
 
@@ -132,7 +121,7 @@ export default function IncidentsPage() {
 
         <select
           value={riskFilter}
-          onChange={(e) => { setRiskFilter(e.target.value); setPage(1) }}
+          onChange={(e) => { setRiskFilter(e.target.value); setPage(1); }}
           className="px-6 py-3 rounded-2xl text-sm font-bold outline-none cursor-pointer border border-slate-200"
           style={{ background: '#020623', color: '#f8fafc' }}>
           <option value="">All Risk Levels</option>
@@ -143,7 +132,7 @@ export default function IncidentsPage() {
 
         <select
           value={sourceFilter}
-          onChange={(e) => { setSourceFilter(e.target.value); setPage(1) }}
+          onChange={(e) => { setSourceFilter(e.target.value); setPage(1); }}
           className="px-6 py-3 rounded-2xl text-sm font-bold outline-none cursor-pointer border border-slate-200"
           style={{ background: '#020623', color: '#f8fafc' }}>
           <option value="">All Sources</option>
@@ -152,7 +141,7 @@ export default function IncidentsPage() {
         </select>
 
         {(riskFilter || sourceFilter) && (
-          <button onClick={() => { setRiskFilter(''); setSourceFilter(''); setPage(1) }}
+          <button onClick={() => { setRiskFilter(''); setSourceFilter(''); setPage(1); }}
             className="text-xs font-black uppercase px-4 py-2 rounded-xl transition-all hover:bg-red-500/10"
             style={{ color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}>
             Reset Filters
@@ -182,7 +171,10 @@ export default function IncidentsPage() {
                       ))}
                       <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest cursor-pointer hover:bg-slate-100/50 transition-colors"
                         style={{ color: '#64748b' }}
-                        onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                        onClick={() => {
+                          setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                          setPage(1); // Reset to page 1 when sort order changes
+                        }}
                       >
                         <div className="flex items-center gap-1">
                           Created At
@@ -240,27 +232,27 @@ export default function IncidentsPage() {
               </div>
 
               {/* Pagination Controls */}
-            <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-white mt-4 rounded-xl shadow-sm">
-              <button
-                onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-                disabled={page === 1 || loading}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${page === 1 || loading ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 hover:bg-slate-50'
-                  }`}
-              >
-                Prev
-              </button>
-              <span className="text-xs font-bold text-slate-500">
-                Page {page} of {Math.max(1, Math.ceil(total / 5))}
-              </span>
-              <button
-                onClick={() => setPage(prev => prev + 1)}
-                disabled={page * 5 >= total || loading}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${page * 5 >= total || loading ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 hover:bg-slate-50'
-                  }`}
-              >
-                Next
-              </button>
-            </div>
+              <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-white mt-4 rounded-xl shadow-sm">
+                <button
+                  onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                  disabled={page === 1 || loading}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${page === 1 || loading ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                >
+                  Prev
+                </button>
+                <span className="text-xs font-bold text-slate-500">
+                  Page {page} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(prev => prev + 1)}
+                  disabled={page >= totalPages || loading}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${page >= totalPages || loading ? 'text-slate-400 cursor-not-allowed' : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                >
+                  Next
+                </button>
+              </div>
               </>
             )}
           </div>
@@ -364,13 +356,6 @@ export default function IncidentsPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Action Button */}
-              {/* <div>
-                <button className="w-full py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-xl shadow-blue-900/20">
-                  Execute Mitigation Suite
-                </button>
-              </div> */}
             </div>
           )}
         </div>
