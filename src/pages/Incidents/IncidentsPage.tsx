@@ -26,7 +26,7 @@ export default function IncidentsPage() {
       const res = await api.get('/api/incidents/', {
         params: {
           page: 1,
-          per_page: 10000, 
+          per_page: 1000, 
         },
       })
       setIncidents(res.data.incidents || [])
