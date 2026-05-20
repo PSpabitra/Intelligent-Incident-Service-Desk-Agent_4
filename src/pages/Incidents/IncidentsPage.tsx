@@ -29,8 +29,10 @@ export default function IncidentsPage() {
       const res = await api.get('/api/incidents/', {
         params: {
           page: page,
-          per_page: 5,
-        }
+          per_page: perPage,
+          sort_by: 'created_at',
+          sort_order: sortOrder,
+        },
       })
       setIncidents(res.data.incidents)
       setTotal(res.data.total || res.data.incidents.length)
@@ -52,8 +54,13 @@ export default function IncidentsPage() {
       const silentLoad = async () => {
         try {
           const res = await api.get('/api/incidents/', {
-            params: { page: page, per_page: 5 }
-          })
+            params: {
+              page: page,
+              per_page: perPage,
+              sort_by: 'created_at',
+              sort_order: sortOrder,
+            },
+          });
           setIncidents(res.data.incidents)
           setTotal(res.data.total || res.data.incidents.length)
           setRefreshCountdown(30) // Reset countdown on successful refresh
@@ -73,16 +80,12 @@ export default function IncidentsPage() {
       clearInterval(intervalId)
       clearInterval(countdownIntervalId)
     }
-  }, [page])
+  }, [page, perPage, sortOrder]);
 
   const filteredIncidents = incidents.filter(inc => {
     const matchesRisk = !riskFilter || inc.risk_level === riskFilter;
     const matchesSource = !sourceFilter || inc.source === sourceFilter;
     return matchesRisk && matchesSource;
-  }).sort((a, b) => {
-    const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-    const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
 
   const totalPages = Math.ceil(total / perPage);
